@@ -59,7 +59,7 @@ class _MainPageState extends State<MainPage> {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: '탐색'),
+          BottomNavigationBarItem(icon: Icon(Icons.folder), label: '탐색'),
           BottomNavigationBarItem(icon: Icon(Icons.add_box), label: '저장'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: '검색'),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: '설정'),
