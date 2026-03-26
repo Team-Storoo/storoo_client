@@ -1,41 +1,92 @@
 import 'package:flutter/foundation.dart';
+import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../models/content.dart';
+import '../models/user_profile.dart';
 
 class DBService {
-  /// 웹/모바일 공통 초기화
+  static Isar? _isar;
+
+  static Isar get isar {
+    if (_isar == null) {
+      throw Exception('Isar가 초기화되지 않았습니다. 먼저 DBService.init()을 호출하세요.');
+    }
+    return _isar!;
+  }
+
+  /// 앱 시작 시 1회 호출
   static Future<void> init() async {
+    if (_isar != null) return;
+
     if (kIsWeb) {
-      // 웹에서는 DB 초기화 대신 더미 처리
-      debugPrint("DBService initialized (dummy for web)");
-    } else {
-      // 모바일/데스크톱에서는 실제 Isar 초기화 코드 작성
-      // 예: await Isar.open([...]);
-      debugPrint("DBService initialized (real DB for mobile/desktop)");
+      debugPrint("웹은 현재 Isar 로컬 DB 예제를 생략합니다.");
+      return;
     }
+
+    final dir = await getApplicationDocumentsDirectory();
+
+    _isar = await Isar.open(
+      [ContentSchema, UserProfileSchema],
+      directory: dir.path,
+      name: 'storoo_db',
+    );
+
+    debugPrint("DBService initialized");
   }
 
-  /// 더미 저장 함수 (웹 확인용)
-  static Future<void> saveContent(Map<String, dynamic> content) async {
-    if (kIsWeb) {
-      debugPrint("Saved content (dummy): $content");
-    } else {
-      // 실제 DB 저장 로직 작성
-    }
+  /// -------------------------
+  /// UserProfile 관련
+  /// -------------------------
+
+  static Future<UserProfile?> getUserProfile() async {
+    if (kIsWeb) return null;
+    return await isar.userProfiles.where().findFirst();
   }
 
-  /// 더미 조회 함수 (웹 확인용)
-  static Future<List<Map<String, dynamic>>> getContents() async {
+  static Future<bool> hasCompletedOnboarding() async {
+    final profile = await getUserProfile();
+    return profile?.onboardingCompleted ?? false;
+  }
+
+  static Future<void> saveUserProfile(UserProfile profile) async {
+    if (kIsWeb) return;
+
+    profile.updatedAt = DateTime.now();
+
+    await isar.writeTxn(() async {
+      await isar.userProfiles.put(profile);
+    });
+  }
+
+  static Future<void> clearUserProfile() async {
+    if (kIsWeb) return;
+
+    await isar.writeTxn(() async {
+      await isar.userProfiles.clear();
+    });
+  }
+
+  /// -------------------------
+  /// Content 관련
+  /// -------------------------
+
+  static Future<void> saveContent(Content content) async {
     if (kIsWeb) {
-      return [
-        {
-          "id": 1,
-          "type": "memo",
-          "title": "웹 확인용 더미 제목",
-          "content": "이건 웹에서 UI 확인용 더미 데이터입니다.",
-        },
-      ];
-    } else {
-      // 실제 DB 조회 로직 작성
+      debugPrint("Saved content (dummy): ${content.title}");
+      return;
+    }
+
+    await isar.writeTxn(() async {
+      await isar.contents.put(content);
+    });
+  }
+
+  static Future<List<Content>> getContents() async {
+    if (kIsWeb) {
       return [];
     }
+
+    return await isar.contents.where().findAll();
   }
 }
