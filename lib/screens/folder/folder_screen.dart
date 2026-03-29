@@ -24,6 +24,7 @@ class _FolderScreenState extends State<FolderScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: false,
         title: Text(
           '내 폴더',

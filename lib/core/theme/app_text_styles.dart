@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 /// ──────────────────────────────────────────────────────────────────────
-/// ★★★ 커스텀 폰트를 적용하는 방법 (직접 해야 하는 작업) ★★★
+/// ★★★ 커스텀 폰트를 적용하는 방법 ★★★
 ///
 /// [STEP 1] 폰트 파일 다운로드
 ///   • Google Fonts 추천: https://fonts.google.com/

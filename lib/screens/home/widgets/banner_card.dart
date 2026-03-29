@@ -23,50 +23,39 @@ class BannerCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // 왼쪽: 캐릭터 영역 (TODO: 실제 이미지 에셋으로 교체)
+          // 왼쪽: 아이콘 영역 (크림색 배경 + 도토리)
           Container(
-            width: 58,
-            margin: const EdgeInsets.all(12),
+            width: 44,
+            height: 44,
+            margin: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xFF2D2D3A),
+              color: const Color(0xFFF5EFE0),
               borderRadius: BorderRadius.circular(10),
             ),
             alignment: Alignment.center,
-            child: const Text('🐿️', style: TextStyle(fontSize: 26)),
+            child: const Text('🌰', style: TextStyle(fontSize: 22)),
           ),
-          // 중앙: 텍스트 3줄
+          // 오른쪽: 텍스트 3줄
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('이제 다람쥐도 정리하며 사는 시대!', style: AppTextStyles.caption),
-                  const SizedBox(height: 2),
+                  Text('이젠 다람쥐도 정리하며 사는 시대!', style: AppTextStyles.caption),
+                  const SizedBox(height: 0.5),
                   Text('내 자료 저장은? Storoo!', style: AppTextStyles.subtitle),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 0.5),
                   Text(
                     'Storoo 사용 방법 보러가기 >',
                     style: AppTextStyles.caption.copyWith(
-                      color: const Color(0xFFFF6B35), // 주황색 링크
+                      color: const Color(0xFFFF6B35),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-          // 오른쪽: 메가폰 아이콘 (TODO: 실제 이미지 에셋으로 교체)
-          Container(
-            width: 42,
-            height: 42,
-            margin: const EdgeInsets.only(right: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFF0EA),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            alignment: Alignment.center,
-            child: const Text('📢', style: TextStyle(fontSize: 22)),
           ),
         ],
       ),

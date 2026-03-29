@@ -13,27 +13,19 @@ import './widgets/folder_list_preview.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  static const double _bannerHeight = 88.0;
-  static const double _bannerOverlap = 44.0;
+  static const double _bannerHeight = 72.0;
+  static const double _bannerOverlap = 36.0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'Storoo',
-          style: AppTextStyles.headline1.copyWith(color: Colors.white),
-        ),
-      ),
+      // AppBar 없음: 타이틀이 스크롤과 함께 움직임
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── 상단 보라 배경 영역 (통계 카드 + 배너 상단 절반) ──
+            // ── 상단 보라 배경 영역 (타이틀 + 통계 카드 + 배너 상단 절반) ──
             Stack(
               clipBehavior: Clip.none,
               children: [
@@ -42,11 +34,27 @@ class HomeScreen extends StatelessWidget {
                   color: AppColors.primary,
                   padding: const EdgeInsets.fromLTRB(
                     16,
-                    16,
+                    0,
                     16,
                     _bannerOverlap + 12,
                   ),
-                  child: const StatsCard(),
+                  child: Column(
+                    children: [
+                      // Storoo 타이틀 (스크롤과 함께 움직임)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
+                            'Storoo',
+                            style: AppTextStyles.headline1.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const StatsCard(),
+                    ],
+                  ),
                 ),
                 // 배너: Positioned(bottom: -_bannerOverlap)으로 경계를 가로질러 걸침
                 Positioned(
