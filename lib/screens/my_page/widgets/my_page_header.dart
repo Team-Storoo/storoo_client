@@ -20,15 +20,7 @@ class MyPageHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Storoo 타이틀 (중앙)
-          Center(
-            child: Text(
-              'Storoo',
-              style: AppTextStyles.headline1.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          Center(child: Text('Storoo', style: AppTextStyles.storooTitle)),
           const SizedBox(height: 20),
           // 인사말
           Text(

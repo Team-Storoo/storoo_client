@@ -42,11 +42,22 @@ import 'app_colors.dart';
 /// TODO: 폰트 파일 추가 후 아래 이름을 pubspec.yaml의 family 이름과 일치시켜줘
 const String _fontFamily = 'Pretendard';
 
+/// 에이투지체 ExtraBold — 'Storoo' 타이틀 전용
+const String _logoFontFamily = 'A2GExtraBold';
+
 /// 앱 전체에서 사용하는 텍스트 스타일 모음
 ///
 /// 새로운 스타일이 필요하면 여기에만 추가하면 됩니다.
 abstract final class AppTextStyles {
   // ── 제목 계열 ────────────────────────────────────────────
+
+  /// Storoo 로고 타이틀 전용 (에이투지체 ExtraBold)
+  static const TextStyle storooTitle = TextStyle(
+    fontFamily: _logoFontFamily,
+    fontSize: 22,
+    color: Colors.white,
+    letterSpacing: 0,
+  );
 
   /// 큰 제목 - 앱바 타이틀, 섹션 헤더 등
   static const TextStyle headline1 = TextStyle(

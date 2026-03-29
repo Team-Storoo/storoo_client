@@ -46,9 +46,7 @@ class HomeScreen extends StatelessWidget {
                         child: Center(
                           child: Text(
                             'Storoo',
-                            style: AppTextStyles.headline1.copyWith(
-                              color: Colors.white,
-                            ),
+                            style: AppTextStyles.storooTitle,
                           ),
                         ),
                       ),
