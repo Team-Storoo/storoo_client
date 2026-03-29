@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_text_styles.dart';
 
-class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+/// 마이페이지 화면
+/// 추후 구현 예정
+class MyPageScreen extends StatelessWidget {
+  const MyPageScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("설정")),
-      body: const Center(child: Text("설정 화면")),
+      appBar: AppBar(title: const Text('마이페이지')),
+      body: const Center(
+        child: Text('마이페이지 (추후 구현)', style: AppTextStyles.body),
+      ),
     );
   }
 }
