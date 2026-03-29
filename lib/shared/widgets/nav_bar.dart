@@ -18,12 +18,19 @@ class AppNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomAppBar(
-      color: AppColors.surface,
-      elevation: 8,
-      shadowColor: Colors.black12,
-      padding: EdgeInsets.zero,
+    return Container(
       height: 64,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        // 상단 방향 그림자 (offset.dy 값을 음수로 설정)
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.14),
+            blurRadius: 10,
+            offset: const Offset(0, -3),
+          ),
+        ],
+      ),
       child: Row(
         children: [
           // Expanded: 4개 아이템이 항상 균등한 너비를 가짐

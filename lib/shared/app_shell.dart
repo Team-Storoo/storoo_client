@@ -38,22 +38,63 @@ class _AppShellState extends State<AppShell> {
       // IndexedStack: 탭 전환 시 각 화면의 스크롤 위치/상태 유지
       body: IndexedStack(index: _selectedIndex, children: _screens),
 
-      // 가운데 저장 버튼 (FAB)
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: 저장 바텀시트 열기
-        },
-        backgroundColor: AppColors.primary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        elevation: 4,
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
+      // bottomNavigationBar 안에 FAB를 함께 배치
+      // - SizedBox 높이 92 = nav bar 64 + FAB 상단 28(절반)
+      // - Positioned(bottom:36): FAB 중심이 nav bar 상단과 일치
+      bottomNavigationBar: SizedBox(
+        height: 92,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // 하단 네비게이션 바 (하단 고정)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: AppNavBar(
+                selectedIndex: _selectedIndex,
+                onTap: _onTabTapped,
+              ),
+            ),
+            // 저장 FAB
+            Positioned(
+              bottom: 36,
+              left: 0,
+              right: 0,
+              child: Center(child: _SaveFab(onTap: () {})),
+            ),
+          ],
+        ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+}
 
-      // 공용 네비게이션 바
-      bottomNavigationBar: AppNavBar(
-        selectedIndex: _selectedIndex,
-        onTap: _onTabTapped,
+/// 저장 FAB 버튼 (AppShell 전용)
+class _SaveFab extends StatelessWidget {
+  const _SaveFab({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.22),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
   }
