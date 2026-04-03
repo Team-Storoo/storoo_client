@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'services/db_service.dart';
-
-// 기존 화면들
-import 'screens/home_screen.dart';
-import 'screens/explore_screen.dart';
-import 'screens/save_screen.dart';
-import 'screens/search_screen.dart';
-import 'screens/settings_screen.dart';
-
-// 온보딩 화면
+import 'core/theme/app_theme.dart';
+import 'shared/app_shell.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 
+/// 전체 앱에서 스크롤바를 숨기는 ScrollBehavior
+class _NoScrollbarBehavior extends MaterialScrollBehavior {
+  @override
+  Widget buildScrollbar(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    return child; // 스크롤바 위젯 없이 그냥 child 반환
+  }
+}
+
+// widgetsFlutterBinding.ensureInitialized() → DBService.init() → runApp() 순서로 실행
+// 앱 실행 전에 Isar DB가 준비되면, 이후 화면에서 바로 DB 사용 가능
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DBService.init();
@@ -24,8 +31,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Storoo',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,
+      scrollBehavior: _NoScrollbarBehavior(),
       home: const AppEntryPage(),
     );
   }
@@ -48,55 +55,11 @@ class AppEntryPage extends StatelessWidget {
         final completed = snapshot.data ?? false;
 
         if (completed) {
-          return const MainPage();
+          return const AppShell();
         } else {
           return const OnboardingScreen();
         }
       },
-    );
-  }
-}
-
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
-
-  @override
-  State<MainPage> createState() => _MainPageState();
-}
-
-class _MainPageState extends State<MainPage> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    ExploreScreen(),
-    SaveScreen(),
-    SearchScreen(),
-    SettingsScreen(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
-          BottomNavigationBarItem(icon: Icon(Icons.folder), label: '탐색'),
-          BottomNavigationBarItem(icon: Icon(Icons.add_box), label: '저장'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: '검색'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: '설정'),
-        ],
-      ),
     );
   }
 }
