@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:storoo/shared/app_shell.dart';
 
 import '../../models/user_profile.dart';
 import '../../services/db_service.dart';
-import '../../main.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -63,7 +63,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     Navigator.of(
       context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const MainPage()));
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const AppShell()));
   }
 
   void nextStep() {
