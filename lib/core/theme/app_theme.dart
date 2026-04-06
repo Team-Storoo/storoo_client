@@ -65,7 +65,7 @@ abstract final class AppTheme {
     ),
 
     // ── 카드 ─────────────────────────────────────────────
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: AppColors.surface,
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
