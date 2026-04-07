@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'services/db_service.dart';
 import 'core/theme/app_theme.dart';
-import 'shared/app_shell.dart';
-import 'screens/onboarding/onboarding_screen.dart';
+import 'screens/splash/splash_screen.dart';
 
 /// 전체 앱에서 스크롤바를 숨기는 ScrollBehavior
 class _NoScrollbarBehavior extends MaterialScrollBehavior {
@@ -33,33 +32,7 @@ class MyApp extends StatelessWidget {
       title: 'Storoo',
       theme: AppTheme.light,
       scrollBehavior: _NoScrollbarBehavior(),
-      home: const AppEntryPage(),
-    );
-  }
-}
-
-class AppEntryPage extends StatelessWidget {
-  const AppEntryPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: DBService.hasCompletedOnboarding(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        final completed = snapshot.data ?? false;
-
-        if (completed) {
-          return const AppShell();
-        } else {
-          return const OnboardingScreen();
-        }
-      },
+      home: const SplashScreen(),
     );
   }
 }
