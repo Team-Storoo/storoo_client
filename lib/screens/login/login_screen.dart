@@ -61,7 +61,7 @@ class LoginScreen extends StatelessWidget {
                       _SocialButton(
                         onTap: () => _goToOnboarding(context),
                         backgroundColor: const Color(0xFFFEE500),
-                        icon: _KakaoIcon(),
+                        iconPath: 'assets/icons/kakao.png',
                         label: '카카오로 시작하기',
                         labelColor: const Color(0xFF191919),
                       ),
@@ -70,7 +70,7 @@ class LoginScreen extends StatelessWidget {
                       _SocialButton(
                         onTap: () => _goToOnboarding(context),
                         backgroundColor: const Color(0xFF03C75A),
-                        icon: _NaverIcon(),
+                        iconPath: 'assets/icons/naver.png',
                         label: '네이버로 시작하기',
                         labelColor: Colors.white,
                       ),
@@ -80,7 +80,7 @@ class LoginScreen extends StatelessWidget {
                         onTap: () => _goToOnboarding(context),
                         backgroundColor: Colors.white,
                         border: Border.all(color: const Color(0xFFDDDDDD)),
-                        icon: _GoogleIcon(),
+                        iconPath: 'assets/icons/google.png',
                         label: '구글로 시작하기',
                         labelColor: const Color(0xFF191919),
                       ),
@@ -125,11 +125,14 @@ class LoginScreen extends StatelessWidget {
 }
 
 /// 공용 소셜 로그인 버튼
+///
+/// [iconPath] assets/icons/ 하위 파일 경로 (예: 'assets/icons/kakao.png')
+/// 이미지 파일이 없으면 빈 SizedBox로 대체됩니다.
 class _SocialButton extends StatelessWidget {
   const _SocialButton({
     required this.onTap,
     required this.backgroundColor,
-    required this.icon,
+    required this.iconPath,
     required this.label,
     required this.labelColor,
     this.border,
@@ -137,7 +140,7 @@ class _SocialButton extends StatelessWidget {
 
   final VoidCallback onTap;
   final Color backgroundColor;
-  final Widget icon;
+  final String iconPath;
   final String label;
   final Color labelColor;
   final BoxBorder? border;
@@ -157,7 +160,15 @@ class _SocialButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(width: 24, height: 24, child: icon),
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: Image.asset(
+                iconPath,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              ),
+            ),
             const SizedBox(width: 10),
             Text(
               label,
@@ -169,64 +180,6 @@ class _SocialButton extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// 카카오 아이콘 (말풍선 두 개 겹친 형태)
-class _KakaoIcon extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const Icon(Icons.chat_bubble, color: Color(0xFF191919), size: 22);
-  }
-}
-
-/// 네이버 아이콘 ('N' 흰 글자)
-class _NaverIcon extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const Text(
-      'N',
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontFamily: 'Pretendard',
-        fontSize: 18,
-        fontWeight: FontWeight.w900,
-        color: Colors.white,
-        height: 1.3,
-      ),
-    );
-  }
-}
-
-/// 구글 아이콘 (멀티컬러 'G')
-class _GoogleIcon extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ShaderMask(
-      shaderCallback:
-          (bounds) => const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF4285F4), // blue
-              Color(0xFFEA4335), // red
-              Color(0xFFFBBC05), // yellow
-              Color(0xFF34A853), // green
-            ],
-            stops: [0.0, 0.35, 0.65, 1.0],
-          ).createShader(bounds),
-      child: const Text(
-        'G',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontFamily: 'Pretendard',
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          color: Colors.white,
-          height: 1.2,
         ),
       ),
     );
