@@ -46,12 +46,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       case 1:
         return _isValidNickname(nicknameController.text.trim());
       case 2:
-        return gender != null && birthYearController.text.trim().isNotEmpty;
+        return gender != null &&
+            _isValidBirthYear(birthYearController.text.trim());
       case 3:
         return _isValidEmail(emailController.text.trim());
       default:
         return false;
     }
+  }
+
+  /// 1900 ~ 현재 연도 사이의 4자리 숫자
+  bool _isValidBirthYear(String value) {
+    if (value.length != 4) return false;
+    final year = int.tryParse(value);
+    if (year == null) return false;
+    final currentYear = DateTime.now().year;
+    return year >= 1900 && year <= currentYear;
   }
 
   /// 한글, 영문 대소문자, 숫자, 밑줄(_), 마침표(.) 만 허용 / 2~15자

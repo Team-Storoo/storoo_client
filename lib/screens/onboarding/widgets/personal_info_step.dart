@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -16,6 +17,15 @@ class PersonalInfoStep extends StatelessWidget {
   final ValueChanged<String> onGenderChanged;
   final TextEditingController birthYearController;
   final VoidCallback onChanged;
+
+  bool get _hasError {
+    final v = birthYearController.text.trim();
+    if (v.isEmpty) return false;
+    if (v.length < 4) return true;
+    final year = int.tryParse(v);
+    if (year == null) return true;
+    return year < 1900 || year > DateTime.now().year;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,21 +59,45 @@ class PersonalInfoStep extends StatelessWidget {
         TextField(
           controller: birthYearController,
           keyboardType: TextInputType.number,
+          maxLength: 4,
+          buildCounter:
+              (
+                _, {
+                required currentLength,
+                required isFocused,
+                required maxLength,
+              }) => null,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(4),
+          ],
           decoration: InputDecoration(
             hintText: '출생년도를 입력해주세요. (예. 1999)',
             hintStyle: AppTextStyles.body.copyWith(
               color: AppColors.textSecondary,
+            ),
+            errorText:
+                _hasError
+                    ? '1900 ~ ${DateTime.now().year} 사이의 연도를 입력해주세요.'
+                    : null,
+            errorStyle: AppTextStyles.caption.copyWith(
+              color: AppColors.error,
+              fontSize: 11,
             ),
             border: OutlineInputBorder(
               borderSide: const BorderSide(color: AppColors.divider),
               borderRadius: BorderRadius.circular(8),
             ),
             enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: AppColors.divider),
+              borderSide: BorderSide(
+                color: _hasError ? AppColors.error : AppColors.divider,
+              ),
               borderRadius: BorderRadius.circular(8),
             ),
             focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: AppColors.primary),
+              borderSide: BorderSide(
+                color: _hasError ? AppColors.error : AppColors.primary,
+              ),
               borderRadius: BorderRadius.circular(8),
             ),
             contentPadding: const EdgeInsets.symmetric(
