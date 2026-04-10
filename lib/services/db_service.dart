@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/content.dart';
 import '../models/user_profile.dart';
@@ -88,5 +89,21 @@ class DBService {
     }
 
     return await isar.contents.where().findAll();
+  }
+
+  /// -------------------------
+  /// 앱 인트로 (최초 1회 표시)
+  /// -------------------------
+
+  static const _kIntroKey = 'intro_seen';
+
+  static Future<bool> hasSeenIntro() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_kIntroKey) ?? false;
+  }
+
+  static Future<void> markIntroSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kIntroKey, true);
   }
 }

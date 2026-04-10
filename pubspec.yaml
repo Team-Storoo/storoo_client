@@ -40,6 +40,7 @@ dependencies:
   isar: ^3.1.0
   isar_flutter_libs: ^3.1.0
   path_provider: ^2.1.5
+  shared_preferences: ^2.3.3
   cupertino_icons: ^1.0.8
 
 
@@ -78,6 +79,7 @@ flutter:
   #   google.png (또는 google.svg)
   assets:
     - assets/icons/
+    - assets/intro/
 
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
