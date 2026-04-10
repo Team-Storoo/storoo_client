@@ -40,6 +40,7 @@ dependencies:
   isar: ^3.1.0
   isar_flutter_libs: ^3.1.0
   path_provider: ^2.1.5
+  shared_preferences: ^2.3.3
   cupertino_icons: ^1.0.8
 
 
@@ -70,6 +71,15 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # ── 아이콘 이미지 등록 ─────────────────────────────────────────────
+  # assets/icons/ 폴더에 아래 파일들을 넣으면 됩니다:
+  #   kakao.png  (또는 kakao.svg)
+  #   naver.png  (또는 naver.svg)
+  #   google.png (또는 google.svg)
+  assets:
+    - assets/icons/
+    - assets/intro/
 
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
