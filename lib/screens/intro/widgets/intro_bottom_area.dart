@@ -8,11 +8,13 @@ class IntroBottomArea extends StatelessWidget {
     required this.current,
     required this.total,
     required this.onNext,
+    this.onPrev,
   });
 
   final int current;
   final int total;
   final VoidCallback onNext;
+  final VoidCallback? onPrev;
 
   @override
   Widget build(BuildContext context) {
@@ -35,32 +37,71 @@ class IntroBottomArea extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton(
-              onPressed: onNext,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shadowColor: Colors.transparent,
-                splashFactory: NoSplash.splashFactory,
-                overlayColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+          Row(
+            children: [
+              if (current > 0) ...[
+                Expanded(
+                  child: SizedBox(
+                    height: 56,
+                    child: OutlinedButton(
+                      onPressed: onPrev,
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(
+                          color: AppColors.primary,
+                          width: 1.5,
+                        ),
+                        elevation: 0,
+                        shadowColor: Colors.transparent,
+                        splashFactory: NoSplash.splashFactory,
+                        overlayColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Text(
+                        '이전',
+                        style: TextStyle(
+                          fontFamily: 'Pretendard',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ).copyWith(elevation: WidgetStateProperty.all(0)),
-              child: Text(
-                current == total - 1 ? '시작하기' : '다음',
-                style: const TextStyle(
-                  fontFamily: 'Pretendard',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                const SizedBox(width: 12),
+              ],
+              Expanded(
+                child: SizedBox(
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: onNext,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shadowColor: Colors.transparent,
+                      splashFactory: NoSplash.splashFactory,
+                      overlayColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ).copyWith(elevation: WidgetStateProperty.all(0)),
+                    child: Text(
+                      current == total - 1 ? '시작하기' : '다음',
+                      style: const TextStyle(
+                        fontFamily: 'Pretendard',
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
           const SizedBox(height: 16),
           Row(
