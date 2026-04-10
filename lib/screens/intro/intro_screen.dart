@@ -38,6 +38,15 @@ class _IntroScreenState extends State<IntroScreen> {
     }
   }
 
+  void _onPrev() {
+    if (_current > 0) {
+      _pageCtrl.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,6 +69,7 @@ class _IntroScreenState extends State<IntroScreen> {
               current: _current,
               total: kIntroPages.length,
               onNext: _onNext,
+              onPrev: _onPrev,
             ),
           ),
         ],

@@ -35,6 +35,7 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       // IndexedStack: 탭 전환 시 각 화면의 스크롤 위치/상태 유지
       body: IndexedStack(index: _selectedIndex, children: _screens),
 

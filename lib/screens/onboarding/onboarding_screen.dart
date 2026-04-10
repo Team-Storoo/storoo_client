@@ -193,22 +193,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
         ),
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 8),
-                Text(
-                  _title,
-                  style: AppTextStyles.headline1.copyWith(fontSize: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 8),
+                      Text(
+                        _title,
+                        style: AppTextStyles.headline1.copyWith(fontSize: 24),
+                      ),
+                      const SizedBox(height: 28),
+                      _buildStepBody(),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 28),
-                Expanded(child: _buildStepBody()),
-                _buildBottomArea(),
-                const SizedBox(height: 24),
-              ],
-            ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                child: _buildBottomArea(),
+              ),
+            ],
           ),
         ),
       ),

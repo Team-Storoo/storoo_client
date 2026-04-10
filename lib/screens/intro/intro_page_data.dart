@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class IntroPageData {
   const IntroPageData({
     required this.title,
