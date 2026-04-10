@@ -16,7 +16,8 @@ const _kCharDurationMs = 260; // 각 글자 슬라이드 인 시간
 const _kCharTotalMs = _kPerCharDelayMs * 5 + _kCharDurationMs;
 const _kBgDelayMs = 680; // 배경 확장 시작 (글자 완료 직후)
 const _kBgDurationMs = 600; // 배경 원형 확장 시간
-const _kNavigateMs = 2400; // 내비게이션 (+0.5초 여유)
+const _kWarmupMs = 500; // 엔진 초기화 후 애니메이션 시작 전 대기
+const _kNavigateMs = _kWarmupMs + 2400; // 워밍업 포함 내비게이션 타이머
 const _kFontSize = 52.0;
 
 // ─── SplashScreen ────────────────────────────────────────────────────────────
@@ -60,14 +61,18 @@ class _SplashScreenState extends State<SplashScreen>
     // 첫 프레임이 실제로 그려진 후 애니메이션 시작 → 앞부분 잘림 방지
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _charCtrl.forward();
-
-      Future.delayed(const Duration(milliseconds: _kBgDelayMs), () {
-        if (mounted) _bgCtrl.forward();
-      });
-
+      _startAnimation();
       _navigate();
     });
+  }
+
+  // 워밍업 딜레이 후 글자 → 배경 순서로 애니메이션 시작
+  Future<void> _startAnimation() async {
+    await Future.delayed(const Duration(milliseconds: _kWarmupMs));
+    if (!mounted) return;
+    _charCtrl.forward();
+    await Future.delayed(const Duration(milliseconds: _kBgDelayMs));
+    if (mounted) _bgCtrl.forward();
   }
 
   Future<void> _navigate() async {
