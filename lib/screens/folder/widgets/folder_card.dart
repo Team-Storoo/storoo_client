@@ -5,13 +5,16 @@ import '../folder_item.dart';
 
 /// 폴더 그리드 단일 카드 위젯
 class FolderCard extends StatelessWidget {
-  const FolderCard({super.key, required this.folder});
+  const FolderCard({super.key, required this.folder, required this.onTap});
 
   final FolderItem folder;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.primaryLight,
@@ -44,6 +47,6 @@ class FolderCard extends StatelessWidget {
           Text('저장된 항목 ${folder.itemCount}개', style: AppTextStyles.caption),
         ],
       ),
-    );
+    ));
   }
 }

@@ -6,10 +6,16 @@ import './folder_card.dart';
 
 /// 폴더 2열 그리드 — 빈 상태일 때 안내 화면 표시
 class FolderGrid extends StatelessWidget {
-  const FolderGrid({super.key, required this.folders, required this.onAddTap});
+  const FolderGrid({
+    super.key,
+    required this.folders,
+    required this.onAddTap,
+    required this.onFolderTap,
+  });
 
   final List<FolderItem> folders;
   final VoidCallback onAddTap;
+  final ValueChanged<FolderItem> onFolderTap;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +31,10 @@ class FolderGrid extends StatelessWidget {
         childAspectRatio: 1.4,
       ),
       itemCount: folders.length,
-      itemBuilder: (_, i) => FolderCard(folder: folders[i]),
+      itemBuilder: (_, i) => FolderCard(
+        folder: folders[i],
+        onTap: () => onFolderTap(folders[i]),
+      ),
     );
   }
 }

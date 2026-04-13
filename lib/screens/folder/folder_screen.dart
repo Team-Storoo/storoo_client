@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import 'folder_item.dart';
+import '../in_folder/in_folder_screen.dart';
 import './widgets/folder_filter_row.dart';
 import './widgets/folder_grid.dart';
 import './widgets/create_folder_dialog.dart';
@@ -103,7 +104,17 @@ class _FolderScreenState extends State<FolderScreen> {
               onSelected: (f) => setState(() => _filter = f),
             ),
             Expanded(
-              child: FolderGrid(folders: _sorted, onAddTap: _showCreateDialog),
+              child: FolderGrid(
+                folders: _sorted,
+                onAddTap: _showCreateDialog,
+                onFolderTap: (folder) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => InFolderScreen(folder: folder),
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
