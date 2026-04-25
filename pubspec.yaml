@@ -27,17 +27,32 @@ environment:
 # dependencies can be manually updated by changing the version numbers below to
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
+
+# isar → DB 핵심 패키지
+# isar_flutter_libs → Flutter 환경에서 Isar 동작을 위한 라이브러리
+# path_provider → 앱 내부 저장소 경로를 얻기 위해 필요
+# isar_generator + build_runner → 모델 클래스를 기반으로 자동 코드 생성
+
 dependencies:
   flutter:
     sdk: flutter
 
+  isar: ^3.1.0
+  isar_flutter_libs: ^3.1.0
+  path_provider: ^2.1.5
+  shared_preferences: ^2.3.3
+  cupertino_icons: ^1.0.8
+
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  build_runner: ^2.4.6
+  isar_generator: ^3.1.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -57,16 +72,48 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
-
-  # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/to/resolution-aware-images
+  # ── 아이콘 이미지 등록 ─────────────────────────────────────────────
+  # assets/icons/ 폴더에 아래 파일들을 넣으면 됩니다:
+  #   kakao.png  (또는 kakao.svg)
+  #   naver.png  (또는 naver.svg)
+  #   google.png (또는 google.svg)
+  assets:
+    - assets/icons/
+    - assets/intro/
 
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
+
+  # ── 프리텐다드 폰트 등록 ─────────────────────────────────────────────
+  # assets/fonts/ 폴더에 아래 파일들을 복사해야 합니다:
+  #   Pretendard-Regular.ttf  (public/ 폴더에서 복사)
+  #   Pretendard-Medium.ttf
+  #   Pretendard-SemiBold.ttf
+  #   Pretendard-Bold.ttf
+  fonts:
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/Pretendard-Thin.otf
+          weight: 100
+        - asset: assets/fonts/Pretendard-ExtraLight.otf
+          weight: 200
+        - asset: assets/fonts/Pretendard-Light.otf
+          weight: 300
+        - asset: assets/fonts/Pretendard-Regular.otf
+          weight: 400
+        - asset: assets/fonts/Pretendard-Medium.otf
+          weight: 500
+        - asset: assets/fonts/Pretendard-SemiBold.otf
+          weight: 600
+        - asset: assets/fonts/Pretendard-Bold.otf
+          weight: 700
+        - asset: assets/fonts/Pretendard-ExtraBold.otf
+          weight: 800
+        - asset: assets/fonts/Pretendard-Black.otf
+          weight: 900
+    - family: A2GExtraBold
+      fonts:
+        - asset: assets/fonts/에이투지체-8ExtraBold.otf
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
