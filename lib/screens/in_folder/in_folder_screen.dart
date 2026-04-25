@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
-import '../folder/folder_item.dart';
+import '/models/folder_item.dart';
 import 'widgets/in_folder_tab_bar.dart';
 import 'widgets/in_folder_search_bar.dart';
 import 'widgets/in_folder_sort_header.dart';

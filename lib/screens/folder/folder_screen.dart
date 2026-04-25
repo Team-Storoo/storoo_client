@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
-import 'folder_item.dart';
+import '/models/folder_item.dart';
 import '../in_folder/in_folder_screen.dart';
 import './widgets/folder_filter_row.dart';
 import './widgets/folder_grid.dart';
 import './widgets/create_folder_dialog.dart';
+import '../../services/db_service.dart';
 
 /// 폴더 화면
-/// 로친 상태로 폴더 목록 관리 (개발/테스트 용)
+/// DB에 저장된 폴더 목록 관리
 class FolderScreen extends StatefulWidget {
   const FolderScreen({super.key});
 
@@ -17,9 +18,49 @@ class FolderScreen extends StatefulWidget {
 }
 
 class _FolderScreenState extends State<FolderScreen> {
-  final List<FolderItem> _folders = [];
+  List<FolderItem> _folders = []; // DB에서 불러온 폴더 목록
   FolderSortFilter _filter = FolderSortFilter.total;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadFolders();
+  }
+
+  /// DB에서 폴더 목록 불러오기
+  Future<void> _loadFolders() async {
+    final folders = await DBService.getFolders();
+    setState(() {
+      _folders = folders;
+    });
+  }
+
+  /// 폴더 생성 다이얼로그 띄우고 DB에 저장
+  Future<void> _showCreateDialog() async {
+    final name = await showDialog<String>(
+      context: context,
+      builder: (_) => const CreateFolderDialog(),
+    );
+
+    if (!mounted) return;
+    if (name == null || name.isEmpty) return;
+
+    if (_folders.length >= 5) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('폴더는 최대 5개까지만 만들 수 있어요')),
+      );
+      return;
+    }
+
+    final folder = FolderItem()
+      ..name = name
+      ..createdAt = DateTime.now();
+
+    await DBService.saveFolder(folder); // DB에 저장
+    await _loadFolders(); // 다시 불러오기
+  }
+
+  /// 필터 상태에 따라 정렬된 폴더 리스트 반환
   List<FolderItem> get _sorted {
     final list = List<FolderItem>.from(_folders);
     switch (_filter) {
@@ -32,23 +73,6 @@ class _FolderScreenState extends State<FolderScreen> {
         break;
     }
     return list;
-  }
-
-  Future<void> _showCreateDialog() async {
-    final name = await showDialog<String>(
-      context: context,
-      builder: (_) => const CreateFolderDialog(),
-    );
-    if (name == null || name.isEmpty) return;
-    setState(() {
-      _folders.add(
-        FolderItem(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          name: name,
-          createdAt: DateTime.now(),
-        ),
-      );
-    });
   }
 
   @override
@@ -85,12 +109,7 @@ class _FolderScreenState extends State<FolderScreen> {
               onTap: () {},
               behavior: HitTestBehavior.opaque,
               child: const Padding(
-                padding: EdgeInsets.only(
-                  left: 4,
-                  right: 16,
-                  top: 12,
-                  bottom: 12,
-                ),
+                padding: EdgeInsets.only(left: 4, right: 16, top: 12, bottom: 12),
                 child: Icon(Icons.more_vert, color: AppColors.textPrimary),
               ),
             ),

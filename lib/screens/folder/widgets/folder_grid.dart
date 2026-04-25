@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../folder_item.dart';
+import '/models/folder_item.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import './folder_card.dart';
@@ -30,15 +30,49 @@ class FolderGrid extends StatelessWidget {
         mainAxisSpacing: 12,
         childAspectRatio: 1.4,
       ),
-      itemCount: folders.length,
-      itemBuilder: (_, i) => FolderCard(
-        folder: folders[i],
-        onTap: () => onFolderTap(folders[i]),
-      ),
+      itemCount: folders.length + 1, // 폴더 개수 + '추가하기' 카드 1개
+      itemBuilder: (_, i) {
+        if (i < folders.length) {
+          // 👉 기존 폴더 카드
+          final folder = folders[i];
+          return FolderCard(
+            folder: folder,
+            onTap: () => onFolderTap(folder),
+          );
+        } else {
+          // 마지막에 '폴더 추가하기' 카드
+          return GestureDetector(
+            onTap: onAddTap,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.primary),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.create_new_folder,
+                        color: AppColors.primary, size: 32),
+                    const SizedBox(height: 8),
+                    Text(
+                      '폴더 추가하기',
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 }
 
+// ======================================================================
 class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.onAddTap});
 
