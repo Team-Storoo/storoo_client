@@ -31,10 +31,11 @@ class FolderGrid extends StatelessWidget {
         childAspectRatio: 1.4,
       ),
       itemCount: folders.length,
-      itemBuilder: (_, i) => FolderCard(
-        folder: folders[i],
-        onTap: () => onFolderTap(folders[i]),
-      ),
+      itemBuilder:
+          (_, i) => FolderCard(
+            folder: folders[i],
+            onTap: () => onFolderTap(folders[i]),
+          ),
     );
   }
 }

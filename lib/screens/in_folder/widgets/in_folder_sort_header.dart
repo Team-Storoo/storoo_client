@@ -59,12 +59,14 @@ class InFolderSortHeader extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'Pretendard',
                 fontSize: 13,
-                fontWeight: sort == InFolderSort.newest
-                    ? FontWeight.w700
-                    : FontWeight.w400,
-                color: sort == InFolderSort.newest
-                    ? AppColors.textPrimary
-                    : AppColors.textSecondary,
+                fontWeight:
+                    sort == InFolderSort.newest
+                        ? FontWeight.w700
+                        : FontWeight.w400,
+                color:
+                    sort == InFolderSort.newest
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
               ),
             ),
           ),
@@ -87,12 +89,14 @@ class InFolderSortHeader extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'Pretendard',
                 fontSize: 13,
-                fontWeight: sort == InFolderSort.oldest
-                    ? FontWeight.w700
-                    : FontWeight.w400,
-                color: sort == InFolderSort.oldest
-                    ? AppColors.textPrimary
-                    : AppColors.textSecondary,
+                fontWeight:
+                    sort == InFolderSort.oldest
+                        ? FontWeight.w700
+                        : FontWeight.w400,
+                color:
+                    sort == InFolderSort.oldest
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
               ),
             ),
           ),
