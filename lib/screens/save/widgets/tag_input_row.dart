@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import 'dashed_border.dart';
 
 /// 태그 입력 위젯
 /// - 추가된 태그 chip 목록 표시 (삭제 가능)
@@ -36,16 +37,25 @@ class TagInputRow extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            ...tags.asMap().entries.map(
-              (e) => _TagChip(label: e.value, onRemove: () => onRemove(e.key)),
-            ),
-            _AddTagChip(onTap: onAdd),
-          ],
-        ),
+        if (tags.isNotEmpty) ...[
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children:
+                tags
+                    .asMap()
+                    .entries
+                    .map(
+                      (e) => _TagChip(
+                        label: e.value,
+                        onRemove: () => onRemove(e.key),
+                      ),
+                    )
+                    .toList(),
+          ),
+          const SizedBox(height: 8),
+        ],
+        _AddTagChip(onTap: onAdd),
       ],
     );
   }
@@ -95,26 +105,36 @@ class _AddTagChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.primary),
+      child: CustomPaint(
+        painter: DashedBorderPainter(
+          color: const Color(0xFFCCCCCC),
+          radius: 24,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.add, size: 14, color: AppColors.primary),
-            const SizedBox(width: 4),
-            Text(
-              '태그 추가하기',
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w500,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                decoration: const BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.add, size: 16, color: Colors.white),
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              const Text(
+                '태그 추가하기',
+                style: TextStyle(
+                  fontFamily: 'Pretendard',
+                  fontSize: 14,
+                  color: Color(0xFF888888),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -180,8 +200,14 @@ class _TagAddDialogState extends State<TagAddDialog> {
             const SizedBox(height: 8),
             TextField(
               controller: _ctrl,
+              autofocus: true,
               maxLength: _maxLength,
               onChanged: (_) => setState(() {}),
+              onSubmitted: (_) {
+                if (_ctrl.text.trim().isNotEmpty) {
+                  Navigator.of(context).pop(_ctrl.text.trim());
+                }
+              },
               style: const TextStyle(fontFamily: 'Pretendard', fontSize: 15),
               decoration: InputDecoration(
                 counterText: '${_ctrl.text.length}/$_maxLength',

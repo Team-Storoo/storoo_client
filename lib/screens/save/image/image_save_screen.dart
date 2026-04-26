@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../folder/folder_item.dart';
 import '../../folder/widgets/create_folder_dialog.dart';
 import '../save_dummy_data.dart';
+import '../widgets/dashed_border.dart';
 import '../widgets/folder_selector.dart';
 import '../widgets/memo_field.dart';
 import '../widgets/tag_input_row.dart';
@@ -27,18 +30,8 @@ class _ImageSaveScreenState extends State<ImageSaveScreen> {
   String? _selectedFolderId;
   final List<String> _tags = [];
 
-  /// 더미 이미지 목록 (색상 코드로 표현, 최대 5개)
-  final List<Color> _images = [];
+  final List<XFile> _images = [];
   static const int _maxImages = 5;
-
-  /// 더미용 색상 팔레트
-  static const List<Color> _palette = [
-    Color(0xFFB39DDB),
-    Color(0xFF80CBC4),
-    Color(0xFFFFCC80),
-    Color(0xFFEF9A9A),
-    Color(0xFFA5D6A7),
-  ];
 
   bool get _canSave =>
       _images.isNotEmpty &&
@@ -58,11 +51,15 @@ class _ImageSaveScreenState extends State<ImageSaveScreen> {
     super.dispose();
   }
 
-  void _addImage() {
+  void _addImage() async {
     if (_images.length >= _maxImages) return;
-    setState(() {
-      _images.add(_palette[_images.length % _palette.length]);
-    });
+    try {
+      final XFile? file = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+      );
+      if (file == null || !mounted) return;
+      setState(() => _images.add(file));
+    } catch (_) {}
   }
 
   void _removeImage(int index) {
@@ -224,7 +221,7 @@ class _ImagePickerRow extends StatelessWidget {
     required this.onRemove,
   });
 
-  final List<Color> images;
+  final List<XFile> images;
   final int maxImages;
   final VoidCallback onAdd;
   final ValueChanged<int> onRemove;
@@ -246,29 +243,38 @@ class _ImagePickerRow extends StatelessWidget {
                 width: _itemSize,
                 height: _itemSize,
                 margin: const EdgeInsets.only(right: 10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFE0E0E0)),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.add_photo_alternate_outlined,
-                      size: 28,
-                      color: Color(0xFFAAAAAA),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '사진 첨부',
-                      style: AppTextStyles.caption.copyWith(fontSize: 11),
-                    ),
-                    Text(
-                      '${images.length}/$maxImages',
-                      style: AppTextStyles.caption.copyWith(fontSize: 10),
-                    ),
-                  ],
+                child: CustomPaint(
+                  painter: DashedBorderPainter(
+                    color: const Color(0xFFCCCCCC),
+                    radius: 10,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.image_outlined,
+                        size: 28,
+                        color: Color(0xFFAAAAAA),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        '사진 첨부',
+                        style: TextStyle(
+                          fontFamily: 'Pretendard',
+                          fontSize: 11,
+                          color: Color(0xFFAAAAAA),
+                        ),
+                      ),
+                      Text(
+                        '${images.length}/$maxImages',
+                        style: const TextStyle(
+                          fontFamily: 'Pretendard',
+                          fontSize: 10,
+                          color: Color(0xFFAAAAAA),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -276,7 +282,7 @@ class _ImagePickerRow extends StatelessWidget {
           // 첨부된 이미지 썸네일
           ...images.asMap().entries.map(
             (e) => _ImageThumbnail(
-              color: e.value,
+              image: e.value,
               index: e.key,
               onRemove: () => onRemove(e.key),
             ),
@@ -289,12 +295,12 @@ class _ImagePickerRow extends StatelessWidget {
 
 class _ImageThumbnail extends StatelessWidget {
   const _ImageThumbnail({
-    required this.color,
+    required this.image,
     required this.index,
     required this.onRemove,
   });
 
-  final Color color;
+  final XFile image;
   final int index;
   final VoidCallback onRemove;
 
@@ -308,36 +314,34 @@ class _ImageThumbnail extends StatelessWidget {
         width: _size,
         height: _size,
         margin: const EdgeInsets.only(right: 10),
-        decoration: BoxDecoration(
-          color: color,
+        child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
-        ),
-        child: Stack(
-          children: [
-            Center(
-              child: Icon(
-                Icons.image,
-                size: 32,
-                color: Colors.white.withOpacity(0.7),
-              ),
-            ),
-            Positioned(
-              top: 4,
-              right: 4,
-              child: GestureDetector(
-                onTap: onRemove,
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
-                    shape: BoxShape.circle,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.file(File(image.path), fit: BoxFit.cover),
+              Positioned(
+                top: 4,
+                right: 4,
+                child: GestureDetector(
+                  onTap: onRemove,
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      size: 13,
+                      color: Colors.white,
+                    ),
                   ),
-                  child: const Icon(Icons.close, size: 13, color: Colors.white),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

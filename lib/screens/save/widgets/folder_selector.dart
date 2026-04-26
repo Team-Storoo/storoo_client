@@ -81,7 +81,7 @@ class FolderSelector extends StatelessWidget {
                 alignment: Alignment.center,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryLight : Colors.white,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color:
@@ -97,9 +97,7 @@ class FolderSelector extends StatelessWidget {
                     fontFamily: 'Pretendard',
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                  ).copyWith(
-                    color: isSelected ? AppColors.primary : AppColors.textPrimary,
-                  ),
+                  ).copyWith(color: AppColors.textPrimary),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
