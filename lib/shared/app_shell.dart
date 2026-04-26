@@ -5,6 +5,7 @@ import '../screens/home/home_screen.dart';
 import '../screens/folder/folder_screen.dart';
 import '../screens/search/search_screen.dart';
 import '../screens/my_page/my_page_screen.dart';
+import '../screens/save/widgets/save_type_sheet.dart';
 
 /// 앱의 메인 레이아웃 셸
 ///
@@ -62,7 +63,9 @@ class _AppShellState extends State<AppShell> {
               bottom: 36,
               left: 0,
               right: 0,
-              child: Center(child: _SaveFab(onTap: () {})),
+              child: Center(
+                child: _SaveFab(onTap: () => SaveTypeSheet.show(context)),
+              ),
             ),
           ],
         ),
