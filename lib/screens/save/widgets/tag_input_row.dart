@@ -70,25 +70,31 @@ class _TagChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFCCCCCC)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             label,
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w500,
+            style: const TextStyle(
+              fontFamily: 'Pretendard',
+              fontSize: 14,
+              color: Color(0xFF333333),
             ),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 6),
           GestureDetector(
             onTap: onRemove,
-            child: const Icon(Icons.close, size: 14, color: AppColors.primary),
+            child: const Icon(
+              Icons.cancel,
+              size: 16,
+              color: Color(0xFF999999),
+            ),
           ),
         ],
       ),
@@ -108,23 +114,23 @@ class _AddTagChip extends StatelessWidget {
       child: CustomPaint(
         painter: DashedBorderPainter(
           color: const Color(0xFFCCCCCC),
-          radius: 24,
+          radius: 20,
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 24,
-                height: 24,
+                width: 20,
+                height: 20,
                 decoration: const BoxDecoration(
                   color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.add, size: 16, color: Colors.white),
+                child: const Icon(Icons.add, size: 14, color: Colors.white),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               const Text(
                 '태그 추가하기',
                 style: TextStyle(

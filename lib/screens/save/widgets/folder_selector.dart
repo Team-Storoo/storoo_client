@@ -76,8 +76,7 @@ class FolderSelector extends StatelessWidget {
             final isSelected = folder.id == selectedFolderId;
             return GestureDetector(
               onTap: () => onSelect(folder.id),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
+              child: Container(
                 alignment: Alignment.center,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
