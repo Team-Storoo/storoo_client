@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/content.dart';
 import '../models/user_profile.dart';
+import '../models/folder_item.dart';
 
 class DBService {
   static Isar? _isar;
@@ -28,7 +29,7 @@ class DBService {
     final dir = await getApplicationDocumentsDirectory();
 
     _isar = await Isar.open(
-      [ContentSchema, UserProfileSchema],
+      [ContentSchema, UserProfileSchema,  FolderItemSchema],
       directory: dir.path,
       name: 'storoo_db',
     );
@@ -106,4 +107,26 @@ class DBService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kIntroKey, true);
   }
+
+  /// -------------------------
+  /// FolderItem 관련
+  /// -------------------------
+
+  static Future<void> saveFolder(FolderItem folder) async {
+    await isar.writeTxn(() async {
+      await isar.folderItems.put(folder);
+    });
+  }
+
+  static Future<List<FolderItem>> getFolders() async {
+    return await isar.folderItems.where().findAll();
+  }
+
+  static Future<void> deleteFolder(int id) async {
+    await isar.writeTxn(() async {
+      await isar.folderItems.delete(id);
+    });
+  }
 }
+
+
