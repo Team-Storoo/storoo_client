@@ -40,8 +40,7 @@ class SearchTabBar extends StatelessWidget {
                   fontFamily: 'Pretendard',
                   fontSize: 15,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                  color:
-                      selected ? AppColors.primary : AppColors.textSecondary,
+                  color: selected ? AppColors.primary : AppColors.textSecondary,
                 ),
               ),
             ),

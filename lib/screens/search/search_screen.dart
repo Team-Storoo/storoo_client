@@ -73,11 +73,12 @@ class _SearchScreenState extends State<SearchScreen> {
           children: [
             SearchTabBar(
               selectedIndex: _selectedTab,
-              onTabChanged: (i) => setState(() {
-                _selectedTab = i;
-                _searchCtrl.clear();
-                _searchQuery = '';
-              }),
+              onTabChanged:
+                  (i) => setState(() {
+                    _selectedTab = i;
+                    _searchCtrl.clear();
+                    _searchQuery = '';
+                  }),
             ),
             SearchInputBar(
               controller: _searchCtrl,
