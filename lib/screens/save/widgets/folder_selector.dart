@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../folder/folder_item.dart';
+import '../folder_item.dart';
 
 /// 저장 폴더 선택 위젯
 /// - 2열 그리드로 폴더 목록 표시

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../folder/folder_item.dart';
+import '../folder_item.dart';
 import '../../folder/widgets/create_folder_dialog.dart';
 import '../save_dummy_data.dart';
 import '../widgets/folder_selector.dart';

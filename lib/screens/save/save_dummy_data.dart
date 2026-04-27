@@ -1,4 +1,4 @@
-import '../folder/folder_item.dart';
+import 'folder_item.dart';
 
 /// 더미 폴더 3개 — DB 연동 전 UI 개발용
 List<FolderItem> createDummyFolders() => [
