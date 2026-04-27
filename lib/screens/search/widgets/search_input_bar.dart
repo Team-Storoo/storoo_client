@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
-/// 폴더 내부 화면 — 키워드 검색 바
+/// 검색 화면 — 키워드 입력 바
 ///
-/// 텍스트 입력 시 우측에 X 버튼이 나타나 검색어를 초기화합니다.
-class InFolderSearchBar extends StatelessWidget {
+/// 입력 시 우측에 X 버튼이 나타나 검색어를 초기화합니다.
+class SearchInputBar extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
-  const InFolderSearchBar({
+  const SearchInputBar({
     super.key,
     required this.controller,
     required this.onChanged,
