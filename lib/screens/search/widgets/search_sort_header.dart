@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
 /// 정렬 방식 (최신순 / 오래된순)
-enum InFolderSort { newest, oldest }
+enum SearchSort { newest, oldest }
 
-/// 폴더 내부 화면 — 검색결과 개수 + 정렬 옵션 헤더
+/// 검색 화면 — 검색결과 개수 + 정렬 옵션 헤더
 ///
 /// 좌측: "검색결과 N" — N은 기본 보라색으로 강조
 /// 우측: "최신순 | 오래된순" — 선택된 항목 bold
-class InFolderSortHeader extends StatelessWidget {
+class SearchSortHeader extends StatelessWidget {
   final int count;
-  final InFolderSort sort;
-  final ValueChanged<InFolderSort> onSortChanged;
+  final SearchSort sort;
+  final ValueChanged<SearchSort> onSortChanged;
 
-  const InFolderSortHeader({
+  const SearchSortHeader({
     super.key,
     required this.count,
     required this.sort,
@@ -52,7 +52,7 @@ class InFolderSortHeader extends StatelessWidget {
           ),
           const Spacer(),
           GestureDetector(
-            onTap: () => onSortChanged(InFolderSort.newest),
+            onTap: () => onSortChanged(SearchSort.newest),
             behavior: HitTestBehavior.opaque,
             child: Text(
               '최신순',
@@ -60,11 +60,11 @@ class InFolderSortHeader extends StatelessWidget {
                 fontFamily: 'Pretendard',
                 fontSize: 13,
                 fontWeight:
-                    sort == InFolderSort.newest
+                    sort == SearchSort.newest
                         ? FontWeight.w700
                         : FontWeight.w400,
                 color:
-                    sort == InFolderSort.newest
+                    sort == SearchSort.newest
                         ? AppColors.textPrimary
                         : AppColors.textSecondary,
               ),
@@ -82,7 +82,7 @@ class InFolderSortHeader extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: () => onSortChanged(InFolderSort.oldest),
+            onTap: () => onSortChanged(SearchSort.oldest),
             behavior: HitTestBehavior.opaque,
             child: Text(
               '오래된순',
@@ -90,11 +90,11 @@ class InFolderSortHeader extends StatelessWidget {
                 fontFamily: 'Pretendard',
                 fontSize: 13,
                 fontWeight:
-                    sort == InFolderSort.oldest
+                    sort == SearchSort.oldest
                         ? FontWeight.w700
                         : FontWeight.w400,
                 color:
-                    sort == InFolderSort.oldest
+                    sort == SearchSort.oldest
                         ? AppColors.textPrimary
                         : AppColors.textSecondary,
               ),

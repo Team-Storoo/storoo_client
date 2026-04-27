@@ -15,38 +15,39 @@ class FolderCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.primaryLight,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  folder.name,
-                  style: AppTextStyles.subtitle,
-                  overflow: TextOverflow.ellipsis,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.primaryLight,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    folder.name,
+                    style: AppTextStyles.subtitle,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-              GestureDetector(
-                onTap: () {},
-                child: const Icon(
-                  Icons.more_vert,
-                  size: 18,
-                  color: AppColors.textSecondary,
+                GestureDetector(
+                  onTap: () {},
+                  child: const Icon(
+                    Icons.more_vert,
+                    size: 18,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          Text('저장된 항목 ${folder.itemCount}개', style: AppTextStyles.caption),
-        ],
+              ],
+            ),
+            Text('저장된 항목 ${folder.itemCount}개', style: AppTextStyles.caption),
+          ],
+        ),
       ),
-    ));
+    );
   }
 }

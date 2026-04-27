@@ -100,11 +100,12 @@ class _InFolderScreenState extends State<InFolderScreen> {
           children: [
             InFolderTabBar(
               selectedIndex: _selectedTab,
-              onTabChanged: (i) => setState(() {
-                _selectedTab = i;
-                _searchCtrl.clear();
-                _searchQuery = '';
-              }),
+              onTabChanged:
+                  (i) => setState(() {
+                    _selectedTab = i;
+                    _searchCtrl.clear();
+                    _searchQuery = '';
+                  }),
             ),
             InFolderSearchBar(
               controller: _searchCtrl,
