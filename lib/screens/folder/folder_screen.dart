@@ -60,6 +60,13 @@ class _FolderScreenState extends State<FolderScreen> {
     await _loadFolders(); // 다시 불러오기
   }
 
+  /// 폴더 삭제 함수
+  Future<void> _deleteFolder(FolderItem folder) async {
+    await DBService.deleteFolder(folder.id); // DB에서 삭제
+    await _loadFolders(); // 목록 갱신
+  }
+
+
   /// 필터 상태에 따라 정렬된 폴더 리스트 반환
   List<FolderItem> get _sorted {
     final list = List<FolderItem>.from(_folders);
@@ -133,6 +140,7 @@ class _FolderScreenState extends State<FolderScreen> {
                     ),
                   );
                 },
+                onDeleteTap: _deleteFolder, // ✅ DB 삭제 연결
               ),
             ),
           ],

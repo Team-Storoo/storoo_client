@@ -11,11 +11,13 @@ class FolderGrid extends StatelessWidget {
     required this.folders,
     required this.onAddTap,
     required this.onFolderTap,
+    this.onDeleteTap, // ✅ 삭제 콜백 추가
   });
 
   final List<FolderItem> folders;
   final VoidCallback onAddTap;
   final ValueChanged<FolderItem> onFolderTap;
+  final ValueChanged<FolderItem>? onDeleteTap; // ✅ 폴더 삭제 콜백
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +40,7 @@ class FolderGrid extends StatelessWidget {
           return FolderCard(
             folder: folder,
             onTap: () => onFolderTap(folder),
+            onDeleteTap: onDeleteTap, // ✅ 삭제 콜백 전달
           );
         } else {
           // 마지막에 '폴더 추가하기' 카드
