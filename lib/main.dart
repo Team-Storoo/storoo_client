@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'services/db_service.dart';
 import 'core/theme/app_theme.dart';
 import 'screens/splash/splash_screen.dart';
-import '../models/content.dart'; // Content 모델 경로에 맞게 수정
 
 /// 전체 앱에서 스크롤바를 숨기는 ScrollBehavior
 class _NoScrollbarBehavior extends MaterialScrollBehavior {

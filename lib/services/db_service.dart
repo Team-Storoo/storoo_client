@@ -84,12 +84,63 @@ class DBService {
     });
   }
 
-  static Future<List<Content>> getContents() async {
+  static Future<void> saveContentToFolder(Content content) async {
     if (kIsWeb) {
-      return [];
+      debugPrint("Saved content (dummy): ${content.title}");
+      return;
     }
 
+    await isar.writeTxn(() async {
+      await isar.contents.put(content);
+    });
+
+    if (content.folderId != null) {
+      await _syncFolderCount(content.folderId!);
+    }
+  }
+
+  static Future<List<Content>> getContents() async {
+    if (kIsWeb) return [];
     return await isar.contents.where().findAll();
+  }
+
+  static Future<List<Content>> getContentsByFolder(int folderId, String type) async {
+    if (kIsWeb) return [];
+    return await isar.contents
+        .filter()
+        .folderIdEqualTo(folderId)
+        .and()
+        .typeEqualTo(type)
+        .and()
+        .deletedAtIsNull()
+        .sortByCreatedAtDesc()
+        .findAll();
+  }
+
+  static Future<void> deleteContentAndSync(int contentId, int? folderId) async {
+    if (kIsWeb) return;
+    await isar.writeTxn(() async {
+      await isar.contents.delete(contentId);
+    });
+    if (folderId != null) {
+      await _syncFolderCount(folderId);
+    }
+  }
+
+  static Future<void> _syncFolderCount(int folderId) async {
+    if (kIsWeb) return;
+    final folder = await isar.folderItems.get(folderId);
+    if (folder == null) return;
+    final count = await isar.contents
+        .filter()
+        .folderIdEqualTo(folderId)
+        .and()
+        .deletedAtIsNull()
+        .count();
+    folder.itemCount = count;
+    await isar.writeTxn(() async {
+      await isar.folderItems.put(folder);
+    });
   }
 
   /// -------------------------

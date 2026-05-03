@@ -1,20 +1,20 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../models/content.dart';
 
-/// 이미지 탭 컨텐츠 — 2열 그리드
-///
-/// 저장된 이미지 목록을 2열 그리드로 표시합니다.
-/// 데이터가 없을 경우 빈 상태 메시지를 표시합니다.
 class InFolderImageGrid extends StatelessWidget {
-  final String searchQuery;
+  final List<Content> items;
+  final Future<void> Function(int id) onDelete;
 
-  const InFolderImageGrid({super.key, required this.searchQuery});
+  const InFolderImageGrid({
+    super.key,
+    required this.items,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // TODO: 실제 이미지 데이터 연결 시 List<ImageItem>으로 교체
-    const items = <String>[];
-
     if (items.isEmpty) {
       return const Center(
         child: Text(
@@ -29,14 +29,96 @@ class InFolderImageGrid extends StatelessWidget {
     }
 
     return GridView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 4,
-        mainAxisSpacing: 4,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: 0.85,
       ),
       itemCount: items.length,
-      itemBuilder: (_, i) => const SizedBox.shrink(),
+      itemBuilder: (_, i) => _ImageCard(item: items[i], onDelete: onDelete),
+    );
+  }
+}
+
+class _ImageCard extends StatelessWidget {
+  final Content item;
+  final Future<void> Function(int id) onDelete;
+
+  const _ImageCard({required this.item, required this.onDelete});
+
+  void _showDeleteMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.delete_outline, color: AppColors.error),
+              title: const Text(
+                '삭제',
+                style: TextStyle(fontFamily: 'Pretendard', color: AppColors.error),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                onDelete(item.id);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onLongPress: () => _showDeleteMenu(context),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.divider),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                child: item.imageUrl != null && item.imageUrl!.isNotEmpty
+                    ? Image.file(
+                        File(item.imageUrl!),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        errorBuilder: (_, __, ___) => const Center(
+                          child: Icon(Icons.broken_image_outlined, color: AppColors.textSecondary, size: 32),
+                        ),
+                      )
+                    : const Center(
+                        child: Icon(Icons.image_outlined, color: AppColors.textSecondary, size: 32),
+                      ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+              child: Text(
+                item.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'Pretendard',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
