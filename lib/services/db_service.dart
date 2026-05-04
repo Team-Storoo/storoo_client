@@ -193,6 +193,27 @@ class DBService {
       await isar.folderItems.delete(id);
     });
   }
+
+  /// -------------------------
+  /// 폴더 사용자 지정순
+  /// -------------------------
+
+  static const _kFolderOrderKey = 'folder_custom_order';
+
+  static Future<List<int>> getCustomFolderOrder() async {
+    final prefs = await SharedPreferences.getInstance();
+    final ids = prefs.getStringList(_kFolderOrderKey);
+    if (ids == null) return [];
+    return ids.map(int.parse).toList();
+  }
+
+  static Future<void> saveCustomFolderOrder(List<int> ids) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      _kFolderOrderKey,
+      ids.map((id) => id.toString()).toList(),
+    );
+  }
 }
 
 

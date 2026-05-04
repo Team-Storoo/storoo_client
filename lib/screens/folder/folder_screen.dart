@@ -18,7 +18,8 @@ class FolderScreen extends StatefulWidget {
 }
 
 class _FolderScreenState extends State<FolderScreen> {
-  List<FolderItem> _folders = []; // DB에서 불러온 폴더 목록
+  List<FolderItem> _folders = [];
+  List<FolderItem> _customOrderedFolders = [];
   FolderSortFilter _filter = FolderSortFilter.total;
 
   @override
@@ -27,12 +28,36 @@ class _FolderScreenState extends State<FolderScreen> {
     _loadFolders();
   }
 
-  /// DB에서 폴더 목록 불러오기
   Future<void> _loadFolders() async {
-    final folders = await DBService.getFolders();
+    final results = await Future.wait([
+      DBService.getFolders(),
+      DBService.getCustomFolderOrder(),
+    ]);
+    final folders = results[0] as List<FolderItem>;
+    final orderedIds = results[1] as List<int>;
+    if (!mounted) return;
     setState(() {
       _folders = folders;
+      _customOrderedFolders = _buildCustomOrder(folders, orderedIds);
     });
+  }
+
+  List<FolderItem> _buildCustomOrder(List<FolderItem> folders, List<int> orderedIds) {
+    if (orderedIds.isEmpty) return List.from(folders);
+    final map = {for (final f in folders) f.id: f};
+    final ordered = orderedIds.where(map.containsKey).map((id) => map[id]!).toList();
+    final remaining = folders.where((f) => !orderedIds.contains(f.id)).toList();
+    return [...ordered, ...remaining];
+  }
+
+  Future<void> _onReorder(int oldIndex, int newIndex) async {
+    setState(() {
+      final item = _customOrderedFolders.removeAt(oldIndex);
+      _customOrderedFolders.insert(newIndex, item);
+    });
+    await DBService.saveCustomFolderOrder(
+      _customOrderedFolders.map((f) => f.id).toList(),
+    );
   }
 
   /// 폴더 생성 다이얼로그 띄우고 DB에 저장
@@ -67,19 +92,17 @@ class _FolderScreenState extends State<FolderScreen> {
   }
 
 
-  /// 필터 상태에 따라 정렬된 폴더 리스트 반환
   List<FolderItem> get _sorted {
-    final list = List<FolderItem>.from(_folders);
     switch (_filter) {
       case FolderSortFilter.name:
-        list.sort((a, b) => a.name.compareTo(b.name));
+        return List<FolderItem>.from(_folders)..sort((a, b) => a.name.compareTo(b.name));
       case FolderSortFilter.recent:
-        list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      case FolderSortFilter.total:
+        return List<FolderItem>.from(_folders)..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       case FolderSortFilter.custom:
-        break;
+        return _customOrderedFolders;
+      case FolderSortFilter.total:
+        return List<FolderItem>.from(_folders);
     }
-    return list;
   }
 
   @override
@@ -140,7 +163,9 @@ class _FolderScreenState extends State<FolderScreen> {
                     ),
                   );
                 },
-                onDeleteTap: _deleteFolder, // ✅ DB 삭제 연결
+                onDeleteTap: _deleteFolder,
+                isReorderable: _filter == FolderSortFilter.custom,
+                onReorder: _onReorder,
               ),
             ),
           ],
