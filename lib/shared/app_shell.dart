@@ -20,15 +20,19 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
 
-  // 탭에 연결된 화면 목록 (FAB는 화면이 아니므로 제외)
-  static const List<Widget> _screens = [
-    HomeScreen(),
-    FolderScreen(),
-    SearchScreen(),
-    MyPageScreen(),
+  final _homeKey = GlobalKey<HomeScreenState>();
+
+  late final List<Widget> _screens = [
+    HomeScreen(key: _homeKey),
+    const FolderScreen(),
+    const SearchScreen(),
+    const MyPageScreen(),
   ];
 
   void _onTabTapped(int index) {
+    if (index == 0) {
+      _homeKey.currentState?.refresh();
+    }
     setState(() => _selectedIndex = index);
   }
 

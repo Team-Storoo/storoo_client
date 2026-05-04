@@ -6,7 +6,11 @@
       "PowerShell(Get-ChildItem -Path \"C:\\\\project_certhub\\\\storoo_client\\\\lib\\\\screens\\\\folder\\\\widgets\" -File | ForEach-Object { $_.Name })",
       "PowerShell(Get-ChildItem -Path \"C:\\\\project_certhub\\\\storoo_client\\\\lib\\\\screens\\\\in_folder\\\\widgets\" -File | ForEach-Object { $_.Name })",
       "Bash(flutter pub *)",
-      "Bash(flutter analyze *)"
+      "Bash(flutter analyze *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\project_certhub\\\\storoo_client\" -Recurse -Force)",
+      "Bash(Select-Object -First 50)",
+      "Bash(Format-Table Name, FullName)",
+      "Bash(dart analyze *)"
     ]
   }
 }

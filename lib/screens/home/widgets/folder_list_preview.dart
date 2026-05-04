@@ -1,23 +1,31 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../models/folder_item.dart';
 
 /// 홈 화면 내 폴더 미리보기 목록 (세로 리스트)
-/// FolderScreen의 전체 목록과 구분하기 위해 별도 위젯으로 분리
-/// TODO: DB 연결 후 실제 폴더 목록 데이터 연결
 class FolderListPreview extends StatelessWidget {
-  const FolderListPreview({super.key});
+  const FolderListPreview({super.key, required this.folders});
+
+  final List<FolderItem> folders;
 
   @override
   Widget build(BuildContext context) {
+    if (folders.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Text('아직 생성한 폴더가 없어요', style: AppTextStyles.caption),
+      );
+    }
+
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       shrinkWrap: true,
-      // 부모 SingleChildScrollView에 스크롤 위임
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: 3, // TODO: 실제 폴더 데이터로 교체
+      itemCount: folders.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (_, index) {
+        final folder = folders[index];
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
@@ -30,12 +38,9 @@ class FolderListPreview extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '폴더 이름 ${index + 1}', // TODO: 실제 폴더 이름으로 교체
-                      style: AppTextStyles.subtitle,
-                    ),
+                    Text(folder.name, style: AppTextStyles.subtitle),
                     const SizedBox(height: 4),
-                    Text('저장된 항목 0개', style: AppTextStyles.caption),
+                    Text('저장된 항목 ${folder.itemCount}개', style: AppTextStyles.caption),
                   ],
                 ),
               ),
