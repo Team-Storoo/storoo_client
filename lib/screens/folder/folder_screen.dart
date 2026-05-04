@@ -14,10 +14,10 @@ class FolderScreen extends StatefulWidget {
   const FolderScreen({super.key});
 
   @override
-  State<FolderScreen> createState() => _FolderScreenState();
+  State<FolderScreen> createState() => FolderScreenState();
 }
 
-class _FolderScreenState extends State<FolderScreen> {
+class FolderScreenState extends State<FolderScreen> {
   List<FolderItem> _folders = [];
   List<FolderItem> _customOrderedFolders = [];
   FolderSortFilter _filter = FolderSortFilter.total;
@@ -27,6 +27,8 @@ class _FolderScreenState extends State<FolderScreen> {
     super.initState();
     _loadFolders();
   }
+
+  Future<void> refresh() => _loadFolders();
 
   Future<void> _loadFolders() async {
     final results = await Future.wait([
@@ -156,12 +158,13 @@ class _FolderScreenState extends State<FolderScreen> {
               child: FolderGrid(
                 folders: _sorted,
                 onAddTap: _showCreateDialog,
-                onFolderTap: (folder) {
-                  Navigator.of(context).push(
+                onFolderTap: (folder) async {
+                  await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => InFolderScreen(folder: folder),
                     ),
                   );
+                  _loadFolders();
                 },
                 onDeleteTap: _deleteFolder,
                 isReorderable: _filter == FolderSortFilter.custom,

@@ -65,7 +65,7 @@ class _SaveContentSheetState extends State<SaveContentSheet> {
     if (_type == 'link') {
       final url = _urlCtrl.text.trim();
       if (url.isEmpty) {
-        _showSnack('URL을 입력해 주세요.');
+        _showSnack('URL을 입력해 주세요.(필수)');
         return;
       }
       content
@@ -73,7 +73,7 @@ class _SaveContentSheetState extends State<SaveContentSheet> {
         ..url = url;
     } else if (_type == 'image') {
       if (_pickedImage == null) {
-        _showSnack('이미지를 선택해 주세요.');
+        _showSnack('이미지를 선택해 주세요.(필수)');
         return;
       }
       content
@@ -83,11 +83,11 @@ class _SaveContentSheetState extends State<SaveContentSheet> {
       final memoTitle = _memoTitleCtrl.text.trim();
       final memoContent = _memoContentCtrl.text.trim();
       if (memoTitle.isEmpty) {
-        _showSnack('제목을 입력해 주세요.');
+        _showSnack('제목을 입력해 주세요.(필수)');
         return;
       }
       if (memoContent.isEmpty) {
-        _showSnack('내용을 입력해 주세요.');
+        _showSnack('내용을 입력해 주세요.(선택)');
         return;
       }
       content
@@ -224,9 +224,9 @@ class _SaveContentSheetState extends State<SaveContentSheet> {
           const SizedBox(height: 6),
           _InputField(controller: _urlCtrl, hint: 'https://...', keyboardType: TextInputType.url),
           const SizedBox(height: 16),
-          const _Label('제목 (선택)'),
+          const _Label('제목 (필수)'),
           const SizedBox(height: 6),
-          _InputField(controller: _linkTitleCtrl, hint: '링크 제목을 입력하세요'),
+          _InputField(controller: _linkTitleCtrl, hint: '링크 제목을 입력하세요(필수)'),
           const SizedBox(height: 8),
         ],
       );
@@ -274,9 +274,9 @@ class _SaveContentSheetState extends State<SaveContentSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          const _Label('제목 (선택)'),
+          const _Label('제목 (필수)'),
           const SizedBox(height: 6),
-          _InputField(controller: _imageTitleCtrl, hint: '이미지 제목을 입력하세요'),
+          _InputField(controller: _imageTitleCtrl, hint: '이미지 제목을 입력하세요(필수)'),
           const SizedBox(height: 8),
         ],
       );
@@ -286,11 +286,11 @@ class _SaveContentSheetState extends State<SaveContentSheet> {
         children: [
           const _Label('제목'),
           const SizedBox(height: 6),
-          _InputField(controller: _memoTitleCtrl, hint: '메모 제목을 입력하세요'),
+          _InputField(controller: _memoTitleCtrl, hint: '메모 제목을 입력하세요(필수)'),
           const SizedBox(height: 16),
           const _Label('내용'),
           const SizedBox(height: 6),
-          _InputField(controller: _memoContentCtrl, hint: '내용을 입력하세요', maxLines: 5),
+          _InputField(controller: _memoContentCtrl, hint: '내용을 입력하세요(필수)', maxLines: 5),
           const SizedBox(height: 8),
         ],
       );
