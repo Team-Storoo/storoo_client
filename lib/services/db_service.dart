@@ -173,6 +173,21 @@ class DBService {
     return await isar.folderItems.where().findAll();
   }
 
+  static Future<List<Content>> getAllActiveContents() async {
+    if (kIsWeb) return [];
+    return await isar.contents.filter().deletedAtIsNull().findAll();
+  }
+
+  static Future<List<Content>> getRecentContents({int limit = 10}) async {
+    if (kIsWeb) return [];
+    return await isar.contents
+        .filter()
+        .deletedAtIsNull()
+        .sortByCreatedAtDesc()
+        .limit(limit)
+        .findAll();
+  }
+
   static Future<void> deleteFolder(int id) async {
     await isar.writeTxn(() async {
       await isar.folderItems.delete(id);

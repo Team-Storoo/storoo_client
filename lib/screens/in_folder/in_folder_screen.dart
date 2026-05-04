@@ -13,18 +13,25 @@ import 'widgets/in_folder_memo_list.dart';
 
 class InFolderScreen extends StatefulWidget {
   final FolderItem folder;
+  final int initialTab;
+  final String initialQuery;
 
-  const InFolderScreen({super.key, required this.folder});
+  const InFolderScreen({
+    super.key,
+    required this.folder,
+    this.initialTab = 0,
+    this.initialQuery = '',
+  });
 
   @override
   State<InFolderScreen> createState() => _InFolderScreenState();
 }
 
 class _InFolderScreenState extends State<InFolderScreen> {
-  int _selectedTab = 0;
+  late int _selectedTab;
   InFolderSort _sort = InFolderSort.newest;
-  final TextEditingController _searchCtrl = TextEditingController();
-  String _searchQuery = '';
+  late final TextEditingController _searchCtrl;
+  late String _searchQuery;
 
   List<Content> _links = [];
   List<Content> _images = [];
@@ -33,6 +40,9 @@ class _InFolderScreenState extends State<InFolderScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedTab = widget.initialTab;
+    _searchQuery = widget.initialQuery;
+    _searchCtrl = TextEditingController(text: widget.initialQuery);
     _loadContents();
   }
 
