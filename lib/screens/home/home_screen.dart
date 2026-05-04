@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../models/content.dart';
 import '../../models/folder_item.dart';
 import '../../services/db_service.dart';
 import '../../shared/widgets/section_header.dart';
@@ -21,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
   List<FolderItem> _folders = [];
+  List<Content> _recentContents = [];
 
   static const double _bannerHeight = 72.0;
   static const double _bannerOverlap = 36.0;
@@ -32,8 +34,16 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> refresh() async {
-    final folders = await DBService.getFolders();
-    if (mounted) setState(() => _folders = folders);
+    final results = await Future.wait([
+      DBService.getFolders(),
+      DBService.getRecentContents(limit: 10),
+    ]);
+    if (mounted) {
+      setState(() {
+        _folders = results[0] as List<FolderItem>;
+        _recentContents = results[1] as List<Content>;
+      });
+    }
   }
 
   @override
@@ -95,7 +105,7 @@ class HomeScreenState extends State<HomeScreen> {
 
             // ── 최근 저장 섹션 ──
             const SectionHeader(title: '최근 저장', topPadding: 12),
-            const RecentSavedList(),
+            RecentSavedList(items: _recentContents),
 
             // ── 내 폴더 섹션 ──
             const SectionHeader(title: '내 폴더', topPadding: 20),
