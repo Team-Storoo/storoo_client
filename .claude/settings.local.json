@@ -10,7 +10,9 @@
       "Bash(Get-ChildItem -Path \"C:\\\\project_certhub\\\\storoo_client\" -Recurse -Force)",
       "Bash(Select-Object -First 50)",
       "Bash(Format-Table Name, FullName)",
-      "Bash(dart analyze *)"
+      "Bash(dart analyze *)",
+      "Bash(Get-ChildItem -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)"
     ]
   }
 }

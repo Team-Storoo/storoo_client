@@ -16,7 +16,8 @@ class _NoScrollbarBehavior extends MaterialScrollBehavior {
   }
 }
 
-// widgetsFlutterBinding.ensureInitialized() → DBService.init() → runApp() 순서로 실행
+// widgetsFl
+// utterBinding.ensureInitialized() → DBService.init() → runApp() 순서로 실행
 // 앱 실행 전에 Isar DB가 준비되면, 이후 화면에서 바로 DB 사용 가능
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
