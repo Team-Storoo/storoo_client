@@ -23,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 class HomeScreenState extends State<HomeScreen> {
   List<FolderItem> _folders = [];
   List<Content> _recentContents = [];
+  int _totalCount = 0;
 
   static const double _bannerHeight = 72.0;
   static const double _bannerOverlap = 36.0;
@@ -37,11 +38,13 @@ class HomeScreenState extends State<HomeScreen> {
     final results = await Future.wait([
       DBService.getFolders(),
       DBService.getRecentContents(limit: 10),
+      DBService.getTotalContentCount(),
     ]);
     if (mounted) {
       setState(() {
         _folders = results[0] as List<FolderItem>;
         _recentContents = results[1] as List<Content>;
+        _totalCount = results[2] as int;
       });
     }
   }
@@ -80,7 +83,7 @@ class HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ),
-                      const StatsCard(),
+                      StatsCard(totalCount: _totalCount),
                     ],
                   ),
                 ),

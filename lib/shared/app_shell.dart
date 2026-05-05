@@ -24,7 +24,10 @@ class _AppShellState extends State<AppShell> {
 
   late final List<Widget> _screens = [
     HomeScreen(key: _homeKey),
-    FolderScreen(key: _folderKey),
+    FolderScreen(
+      key: _folderKey,
+      onContentSaved: () => _homeKey.currentState?.refresh(),
+    ),
     const SearchScreen(),
     const MyPageScreen(),
   ];

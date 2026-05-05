@@ -16,12 +16,14 @@ class InFolderScreen extends StatefulWidget {
   final FolderItem folder;
   final int initialTab;
   final String initialQuery;
+  final VoidCallback? onContentSaved;
 
   const InFolderScreen({
     super.key,
     required this.folder,
     this.initialTab = 0,
     this.initialQuery = '',
+    this.onContentSaved,
   });
 
   @override
@@ -150,7 +152,10 @@ class _InFolderScreenState extends State<InFolderScreen> {
       builder: (_) => SaveContentSheet(
         folderId: widget.folder.id,
         folderName: widget.folder.name,
-        onSaved: _loadContents,
+        onSaved: () {
+          _loadContents();
+          widget.onContentSaved?.call();
+        },
       ),
     );
   }

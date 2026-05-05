@@ -1,41 +1,94 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../services/db_service.dart';
 
-/// 저장 유형 분포 섹션
-/// 링크 / 이미지 / 메모 각각 아이콘 + 프로그레스 바 + 퍼센트 표시
-/// TODO: DB 연결 후 실제 비율 데이터 연결
-class StorageTypeSection extends StatelessWidget {
+class StorageTypeSection extends StatefulWidget {
   const StorageTypeSection({super.key});
 
   @override
+  State<StorageTypeSection> createState() => _StorageTypeSectionState();
+}
+
+class _StorageTypeSectionState extends State<StorageTypeSection> {
+  int _linkCount = 0;
+  int _imageCount = 0;
+  int _memoCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCounts();
+  }
+
+  Future<void> _loadCounts() async {
+    final counts = await DBService.getContentCountsByType();
+    if (mounted) {
+      setState(() {
+        _linkCount = counts['link'] ?? 0;
+        _imageCount = counts['image'] ?? 0;
+        _memoCount = counts['memo'] ?? 0;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final total = _linkCount + _imageCount + _memoCount;
+
+    double linkRatio = 0;
+    double imageRatio = 0;
+    double memoRatio = 0;
+    String linkPercent = '0%';
+    String imagePercent = '0%';
+    String memoPercent = '0%';
+
+    if (total > 0) {
+      linkRatio = _linkCount / total;
+      imageRatio = _imageCount / total;
+      memoRatio = _memoCount / total;
+      linkPercent = '${(linkRatio * 100).round()}%';
+      imagePercent = '${(imageRatio * 100).round()}%';
+      memoPercent = '${(memoRatio * 100).round()}%';
+    }
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('저장 유형 분포', style: AppTextStyles.subtitle),
+          Row(
+            children: [
+              Text('저장 유형 분포', style: AppTextStyles.subtitle),
+              const Spacer(),
+              Text(
+                '총 $total개',
+                style: AppTextStyles.body.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
           _StorageTypeRow(
             icon: Icons.link,
             label: '링크',
-            ratio: 0.55, // TODO: 실제 값 연결
-            percent: '55%',
+            ratio: linkRatio,
+            percent: linkPercent,
           ),
           const SizedBox(height: 12),
           _StorageTypeRow(
             icon: Icons.image_outlined,
             label: '이미지',
-            ratio: 0.33,
-            percent: '33%',
+            ratio: imageRatio,
+            percent: imagePercent,
           ),
           const SizedBox(height: 12),
           _StorageTypeRow(
             icon: Icons.note_outlined,
             label: '메모',
-            ratio: 0.12,
-            percent: '12%',
+            ratio: memoRatio,
+            percent: memoPercent,
           ),
         ],
       ),
@@ -43,7 +96,6 @@ class StorageTypeSection extends StatelessWidget {
   }
 }
 
-/// 저장 유형 단일 행 (StorageTypeSection 전용)
 class _StorageTypeRow extends StatelessWidget {
   const _StorageTypeRow({
     required this.icon,
@@ -54,14 +106,13 @@ class _StorageTypeRow extends StatelessWidget {
 
   final IconData icon;
   final String label;
-  final double ratio; // 0.0 ~ 1.0
+  final double ratio;
   final String percent;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // 아이콘 + 라벨
         SizedBox(
           width: 70,
           child: Row(
@@ -72,7 +123,6 @@ class _StorageTypeRow extends StatelessWidget {
             ],
           ),
         ),
-        // 프로그레스 바
         Expanded(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(6),
@@ -87,7 +137,6 @@ class _StorageTypeRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        // 퍼센트 텍스트
         SizedBox(
           width: 36,
           child: Text(

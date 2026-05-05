@@ -11,7 +11,9 @@ import '../../services/db_service.dart';
 /// 폴더 화면
 /// DB에 저장된 폴더 목록 관리
 class FolderScreen extends StatefulWidget {
-  const FolderScreen({super.key});
+  final VoidCallback? onContentSaved;
+
+  const FolderScreen({super.key, this.onContentSaved});
 
   @override
   State<FolderScreen> createState() => FolderScreenState();
@@ -161,7 +163,10 @@ class FolderScreenState extends State<FolderScreen> {
                 onFolderTap: (folder) async {
                   await Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => InFolderScreen(folder: folder),
+                      builder: (_) => InFolderScreen(
+                        folder: folder,
+                        onContentSaved: widget.onContentSaved,
+                      ),
                     ),
                   );
                   _loadFolders();

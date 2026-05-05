@@ -178,6 +178,24 @@ class DBService {
     return await isar.contents.filter().deletedAtIsNull().findAll();
   }
 
+  static Future<int> getTotalContentCount() async {
+    if (kIsWeb) return 0;
+    return await isar.contents.filter().deletedAtIsNull().count();
+  }
+
+  static Future<Map<String, int>> getContentCountsByType() async {
+    if (kIsWeb) return {'link': 0, 'image': 0, 'memo': 0};
+    final counts = <String, int>{'link': 0, 'image': 0, 'memo': 0};
+    for (final type in counts.keys) {
+      counts[type] = await isar.contents
+          .filter()
+          .typeEqualTo(type)
+          .deletedAtIsNull()
+          .count();
+    }
+    return counts;
+  }
+
   static Future<List<Content>> getRecentContents({int limit = 10}) async {
     if (kIsWeb) return [];
     return await isar.contents
