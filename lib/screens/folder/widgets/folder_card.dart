@@ -6,13 +6,15 @@ import '../../../core/theme/app_text_styles.dart';
 class FolderCard extends StatelessWidget {
   final FolderItem folder;
   final VoidCallback onTap;
-  final ValueChanged<FolderItem>? onDeleteTap; // ✅ 삭제 콜백 추가
+  final ValueChanged<FolderItem>? onDeleteTap;
+  final ValueChanged<FolderItem>? onRenameTap;
 
   const FolderCard({
     super.key,
     required this.folder,
     required this.onTap,
     this.onDeleteTap,
+    this.onRenameTap,
   });
 
   @override
@@ -53,14 +55,17 @@ class FolderCard extends StatelessWidget {
               top: 4,
               child: PopupMenuButton<String>(
                 onSelected: (value) {
-                  if (value == 'delete' && onDeleteTap != null) {
-                    onDeleteTap!(folder); // 삭제 실행
-                  }
+                  if (value == 'rename') onRenameTap?.call(folder);
+                  if (value == 'delete') onDeleteTap?.call(folder);
                 },
                 itemBuilder: (context) => [
                   const PopupMenuItem(
+                    value: 'rename',
+                    child: Text('폴더 이름 수정'),
+                  ),
+                  const PopupMenuItem(
                     value: 'delete',
-                    child: Text('삭제'),
+                    child: Text('폴더 삭제'),
                   ),
                 ],
                 child: const Icon(Icons.more_vert,

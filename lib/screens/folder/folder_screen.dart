@@ -89,6 +89,19 @@ class FolderScreenState extends State<FolderScreen> {
     await _loadFolders(); // 다시 불러오기
   }
 
+  /// 폴더 이름 수정
+  Future<void> _renameFolder(FolderItem folder) async {
+    final name = await showDialog<String>(
+      context: context,
+      builder: (_) => CreateFolderDialog(initialName: folder.name, isRename: true),
+    );
+    if (!mounted) return;
+    if (name == null || name.isEmpty || name == folder.name) return;
+    folder.name = name;
+    await DBService.saveFolder(folder);
+    await _loadFolders();
+  }
+
   /// 폴더 삭제 함수
   Future<void> _deleteFolder(FolderItem folder) async {
     await DBService.deleteFolder(folder.id); // DB에서 삭제
@@ -160,6 +173,7 @@ class FolderScreenState extends State<FolderScreen> {
               child: FolderGrid(
                 folders: _sorted,
                 onAddTap: _showCreateDialog,
+                onRenameTap: _renameFolder,
                 onFolderTap: (folder) async {
                   await Navigator.of(context).push(
                     MaterialPageRoute(

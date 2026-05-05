@@ -11,6 +11,7 @@ class FolderGrid extends StatelessWidget {
     required this.onAddTap,
     required this.onFolderTap,
     this.onDeleteTap,
+    this.onRenameTap,
     this.isReorderable = false,
     this.onReorder,
   });
@@ -19,6 +20,7 @@ class FolderGrid extends StatelessWidget {
   final VoidCallback onAddTap;
   final ValueChanged<FolderItem> onFolderTap;
   final ValueChanged<FolderItem>? onDeleteTap;
+  final ValueChanged<FolderItem>? onRenameTap;
   final bool isReorderable;
   final void Function(int oldIndex, int newIndex)? onReorder;
 
@@ -33,6 +35,7 @@ class FolderGrid extends StatelessWidget {
         onAddTap: onAddTap,
         onFolderTap: onFolderTap,
         onDeleteTap: onDeleteTap,
+        onRenameTap: onRenameTap,
         onReorder: onReorder!,
       );
     }
@@ -52,6 +55,7 @@ class FolderGrid extends StatelessWidget {
             folder: folder,
             onTap: () => onFolderTap(folder),
             onDeleteTap: onDeleteTap,
+            onRenameTap: onRenameTap,
           );
         }
         return _AddCard(onTap: onAddTap);
@@ -69,12 +73,14 @@ class _ReorderableGrid extends StatefulWidget {
     required this.onFolderTap,
     required this.onReorder,
     this.onDeleteTap,
+    this.onRenameTap,
   });
 
   final List<FolderItem> folders;
   final VoidCallback onAddTap;
   final ValueChanged<FolderItem> onFolderTap;
   final ValueChanged<FolderItem>? onDeleteTap;
+  final ValueChanged<FolderItem>? onRenameTap;
   final void Function(int oldIndex, int newIndex) onReorder;
 
   @override
@@ -154,6 +160,7 @@ class _ReorderableGridState extends State<_ReorderableGrid> {
                   folder: folder,
                   onTap: _draggingIndex == null ? () => widget.onFolderTap(folder) : () {},
                   onDeleteTap: widget.onDeleteTap,
+                  onRenameTap: widget.onRenameTap,
                 ),
               ),
             );
