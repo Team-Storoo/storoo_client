@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/content.dart';
@@ -5,11 +6,13 @@ import '../../../models/content.dart';
 class InFolderLinkList extends StatelessWidget {
   final List<Content> items;
   final Future<void> Function(int id) onDelete;
+  final String folderName;
 
   const InFolderLinkList({
     super.key,
     required this.items,
     required this.onDelete,
+    required this.folderName,
   });
 
   @override
@@ -30,16 +33,25 @@ class InFolderLinkList extends StatelessWidget {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
       itemCount: items.length,
-      itemBuilder: (_, i) => _LinkCard(item: items[i], onDelete: onDelete),
+      itemBuilder: (_, i) => _LinkCard(
+        item: items[i],
+        folderName: folderName,
+        onDelete: onDelete,
+      ),
     );
   }
 }
 
 class _LinkCard extends StatelessWidget {
   final Content item;
+  final String folderName;
   final Future<void> Function(int id) onDelete;
 
-  const _LinkCard({required this.item, required this.onDelete});
+  const _LinkCard({
+    required this.item,
+    required this.folderName,
+    required this.onDelete,
+  });
 
   void _showDeleteMenu(BuildContext context) {
     showModalBottomSheet(
@@ -69,8 +81,59 @@ class _LinkCard extends StatelessWidget {
     return '${dt.year}.${dt.month.toString().padLeft(2, '0')}.${dt.day.toString().padLeft(2, '0')}';
   }
 
+  String _extractSource(String? url) {
+    if (url == null || url.isEmpty) return '';
+    try {
+      final host = Uri.parse(url).host.toLowerCase();
+      if (host.contains('youtube.com') || host.contains('youtu.be')) return 'Youtube';
+      if (host.contains('instagram.com')) return 'Instagram';
+      if (host.contains('twitter.com') || host.contains('x.com')) return 'Twitter';
+      if (host.contains('naver.com')) return 'Naver';
+      if (host.contains('google.com')) return 'Google';
+      if (host.contains('tiktok.com')) return 'TikTok';
+      final domain = host.startsWith('www.') ? host.substring(4) : host;
+      final part = domain.split('.').first;
+      if (part.isEmpty) return domain;
+      return part[0].toUpperCase() + part.substring(1);
+    } catch (_) {
+      return '';
+    }
+  }
+
+  Widget _buildThumbnail() {
+    final imageUrl = item.imageUrl;
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      final image = imageUrl.startsWith('http')
+          ? Image.network(imageUrl, width: 68, height: 68, fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _placeholder())
+          : Image.file(File(imageUrl), width: 68, height: 68, fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _placeholder());
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: image,
+      );
+    }
+    return _placeholder();
+  }
+
+  Widget _placeholder() {
+    return Container(
+      width: 68,
+      height: 68,
+      decoration: BoxDecoration(
+        color: AppColors.primaryLight,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Icon(Icons.link, color: AppColors.primary, size: 28),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final source = _extractSource(item.url);
+    final dateStr = _formatDate(item.createdAt);
+    final dateSource = source.isNotEmpty ? '$dateStr | $source' : dateStr;
+
     return GestureDetector(
       onLongPress: () => _showDeleteMenu(context),
       child: Container(
@@ -84,23 +147,13 @@ class _LinkCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.link, color: AppColors.primary, size: 20),
-            ),
-            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     item.title,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontFamily: 'Pretendard',
@@ -109,32 +162,66 @@ class _LinkCard extends StatelessWidget {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  if (item.url != null && item.url!.isNotEmpty) ...[
-                    const SizedBox(height: 3),
-                    Text(
-                      item.url!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontFamily: 'Pretendard',
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   Text(
-                    _formatDate(item.createdAt),
+                    dateSource,
                     style: const TextStyle(
                       fontFamily: 'Pretendard',
-                      fontSize: 11,
+                      fontSize: 12,
                       color: AppColors.textSecondary,
                     ),
                   ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '폴더 > $folderName',
+                    style: const TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  if (item.tags.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: item.tags
+                          .take(5)
+                          .map((tag) => _TagChip(tag: tag))
+                          .toList(),
+                    ),
+                  ],
                 ],
               ),
             ),
+            const SizedBox(width: 12),
+            _buildThumbnail(),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TagChip extends StatelessWidget {
+  final String tag;
+
+  const _TagChip({required this.tag});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF2F2F2),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        tag,
+        style: const TextStyle(
+          fontFamily: 'Pretendard',
+          fontSize: 11,
+          color: AppColors.textSecondary,
         ),
       ),
     );

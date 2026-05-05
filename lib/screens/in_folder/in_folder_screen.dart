@@ -29,7 +29,7 @@ class InFolderScreen extends StatefulWidget {
 
 class _InFolderScreenState extends State<InFolderScreen> {
   late int _selectedTab;
-  InFolderSort _sort = InFolderSort.newest;
+  InFolderSort _sort = InFolderSort.relevant;
   late final TextEditingController _searchCtrl;
   late String _searchQuery;
 
@@ -77,11 +77,17 @@ class _InFolderScreenState extends State<InFolderScreen> {
             final q = _searchQuery.toLowerCase();
             return c.title.toLowerCase().contains(q) ||
                 (c.url?.toLowerCase().contains(q) ?? false) ||
-                (c.content?.toLowerCase().contains(q) ?? false);
+                (c.content?.toLowerCase().contains(q) ?? false) ||
+                c.tags.any((t) => t.toLowerCase().contains(q));
           }).toList();
 
-    if (_sort == InFolderSort.oldest) {
-      result.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    switch (_sort) {
+      case InFolderSort.newest:
+        result.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      case InFolderSort.oldest:
+        result.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      case InFolderSort.relevant:
+        break;
     }
     return result;
   }
@@ -101,6 +107,7 @@ class _InFolderScreenState extends State<InFolderScreen> {
         return InFolderLinkList(
           items: _filtered(_links),
           onDelete: _deleteContent,
+          folderName: widget.folder.name,
         );
       case 1:
         return InFolderImageGrid(
@@ -204,6 +211,7 @@ class _InFolderScreenState extends State<InFolderScreen> {
               count: _currentCount,
               sort: _sort,
               onSortChanged: (s) => setState(() => _sort = s),
+              onFilterTap: () {},
             ),
             Expanded(child: _buildTabContent()),
           ],
