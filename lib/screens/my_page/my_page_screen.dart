@@ -3,10 +3,23 @@ import '../../services/db_service.dart';
 import './widgets/my_page_header.dart';
 import './widgets/storage_type_section.dart';
 import './widgets/my_page_menu_section.dart';
+import './support/notice_screen.dart';
+import './support/inquiry_screen.dart';
+import './support/bug_report_screen.dart';
+import './policy/terms_screen.dart';
+import './policy/privacy_screen.dart';
+import './policy/marketing_screen.dart';
+import './policy/data_policy_screen.dart';
+import './settings/notification_screen.dart';
+import './settings/theme_screen.dart';
 
 /// 마이페이지 화면
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
+
+  void _push(BuildContext context, Widget screen) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+  }
 
   @override
   State<MyPageScreen> createState() => _MyPageScreenState();
@@ -49,9 +62,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
               title: '고객 지원',
               items: const ['공지사항', '서비스 문의', '버그 제보하기'],
               onTaps: [
-                () {},
-                () {},
-                () {},
+                () => _push(context, const NoticeScreen()),
+                () => _push(context, const InquiryScreen()),
+                () => _push(context, const BugReportScreen()),
               ],
             ),
 
@@ -65,10 +78,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 '데이터 제공 정책',
               ],
               onTaps: [
-                () {},
-                () {},
-                () {},
-                () {},
+                () => _push(context, const TermsScreen()),
+                () => _push(context, const PrivacyScreen()),
+                () => _push(context, const MarketingScreen()),
+                () => _push(context, const DataPolicyScreen()),
               ],
             ),
 
@@ -77,9 +90,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
               title: '설정',
               items: const ['알림 설정', '테마 설정', '로그아웃'],
               onTaps: [
-                () {},
-                () {},
-                () {},
+                () => _push(context, const NotificationScreen()),
+                () => _push(context, const ThemeScreen()),
+                () {}, // TODO: 로그아웃
               ],
             ),
 
