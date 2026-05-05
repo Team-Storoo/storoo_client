@@ -3,12 +3,10 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 /// 마이페이지 상단 보라 헤더
-/// - "Storoo" 타이틀 (중앙)
-/// - 인사 + 이름 (왼쪽)
-/// - 프로필 편집 버튼 (오른쪽)
-/// TODO: 실제 사용자 이름 데이터 연결
 class MyPageHeader extends StatelessWidget {
-  const MyPageHeader({super.key});
+  final String nickname;
+
+  const MyPageHeader({super.key, required this.nickname});
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +26,9 @@ class MyPageHeader extends StatelessWidget {
             style: AppTextStyles.body.copyWith(color: Colors.white),
           ),
           const SizedBox(height: 2),
-          // 이름
+          // 닉네임
           Text(
-            'OOO님', // TODO: 실제 사용자 이름으로 교체
+            '$nickname님',
             style: AppTextStyles.headline1.copyWith(
               color: Colors.white,
               fontSize: 30,

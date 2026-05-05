@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
-/// 홈 상단 통계 카드
-/// "저장된 내 자료는 총 N 개" 표시
-/// TODO: DB 연결 후 count 파라미터로 실제 개수 전달
 class StatsCard extends StatelessWidget {
-  const StatsCard({super.key});
+  final int totalCount;
+
+  const StatsCard({super.key, required this.totalCount});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +28,7 @@ class StatsCard extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                '-', // TODO: DB 연결 후 실제 개수로 교체
+                '$totalCount',
                 style: AppTextStyles.headline1.copyWith(
                   fontSize: 28,
                   color: AppColors.textPrimary,

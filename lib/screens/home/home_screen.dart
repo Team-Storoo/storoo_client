@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../models/content.dart';
+import '../../models/folder_item.dart';
+import '../../services/db_service.dart';
 import '../../shared/widgets/section_header.dart';
 import './widgets/stats_card.dart';
 import './widgets/banner_card.dart';
@@ -10,11 +13,41 @@ import './widgets/folder_list_preview.dart';
 
 /// 홈 화면
 /// AppBar(고정) + ScrollView(통계 카드, 배너, 섹션들) 구조
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  HomeScreenState createState() => HomeScreenState();
+}
+
+class HomeScreenState extends State<HomeScreen> {
+  List<FolderItem> _folders = [];
+  List<Content> _recentContents = [];
+  int _totalCount = 0;
 
   static const double _bannerHeight = 72.0;
   static const double _bannerOverlap = 36.0;
+
+  @override
+  void initState() {
+    super.initState();
+    refresh();
+  }
+
+  Future<void> refresh() async {
+    final results = await Future.wait([
+      DBService.getFolders(),
+      DBService.getRecentContents(limit: 10),
+      DBService.getTotalContentCount(),
+    ]);
+    if (mounted) {
+      setState(() {
+        _folders = results[0] as List<FolderItem>;
+        _recentContents = results[1] as List<Content>;
+        _totalCount = results[2] as int;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +83,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const StatsCard(),
+                      StatsCard(totalCount: _totalCount),
                     ],
                   ),
                 ),
@@ -75,11 +108,11 @@ class HomeScreen extends StatelessWidget {
 
             // ── 최근 저장 섹션 ──
             const SectionHeader(title: '최근 저장', topPadding: 12),
-            const RecentSavedList(),
+            RecentSavedList(items: _recentContents),
 
             // ── 내 폴더 섹션 ──
             const SectionHeader(title: '내 폴더', topPadding: 20),
-            const FolderListPreview(),
+            FolderListPreview(folders: _folders),
 
             const SizedBox(height: 100), // 하단 네비게이션 바 여백
           ],

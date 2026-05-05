@@ -11,31 +11,64 @@ import '../../services/db_service.dart';
 /// 폴더 화면
 /// DB에 저장된 폴더 목록 관리
 class FolderScreen extends StatefulWidget {
-  const FolderScreen({super.key});
+  final VoidCallback? onContentSaved;
+
+  const FolderScreen({super.key, this.onContentSaved});
 
   @override
-  State<FolderScreen> createState() => _FolderScreenState();
+  State<FolderScreen> createState() => FolderScreenState();
 }
 
-class _FolderScreenState extends State<FolderScreen> {
-  List<FolderItem> _folders = []; // DB에서 불러온 폴더 목록
+class FolderScreenState extends State<FolderScreen> {
+  // ── 상태 ────────────────────────────────────────────────────────────
+  List<FolderItem> _folders = [];
+  List<FolderItem> _customOrderedFolders = [];
   FolderSortFilter _filter = FolderSortFilter.total;
 
+  // ── 초기화 ──────────────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
     _loadFolders();
   }
 
-  /// DB에서 폴더 목록 불러오기
+  // ── 데이터 로드 ─────────────────────────────────────────────────────
+  Future<void> refresh() => _loadFolders();
+
   Future<void> _loadFolders() async {
-    final folders = await DBService.getFolders();
+    final results = await Future.wait([
+      DBService.getFolders(),
+      DBService.getCustomFolderOrder(),
+    ]);
+    final folders = results[0] as List<FolderItem>;
+    final orderedIds = results[1] as List<int>;
+    if (!mounted) return;
     setState(() {
       _folders = folders;
+      _customOrderedFolders = _buildCustomOrder(folders, orderedIds);
     });
   }
 
-  /// 폴더 생성 다이얼로그 띄우고 DB에 저장
+  // ── 사용자 지정 순서 ────────────────────────────────────────────────
+  List<FolderItem> _buildCustomOrder(List<FolderItem> folders, List<int> orderedIds) {
+    if (orderedIds.isEmpty) return List.from(folders);
+    final map = {for (final f in folders) f.id: f};
+    final ordered = orderedIds.where(map.containsKey).map((id) => map[id]!).toList();
+    final remaining = folders.where((f) => !orderedIds.contains(f.id)).toList();
+    return [...ordered, ...remaining];
+  }
+
+  Future<void> _onReorder(int oldIndex, int newIndex) async {
+    setState(() {
+      final item = _customOrderedFolders.removeAt(oldIndex);
+      _customOrderedFolders.insert(newIndex, item);
+    });
+    await DBService.saveCustomFolderOrder(
+      _customOrderedFolders.map((f) => f.id).toList(),
+    );
+  }
+
+  // ── 폴더 CRUD ───────────────────────────────────────────────────────
   Future<void> _showCreateDialog() async {
     final name = await showDialog<String>(
       context: context,
@@ -56,25 +89,42 @@ class _FolderScreenState extends State<FolderScreen> {
       ..name = name
       ..createdAt = DateTime.now();
 
-    await DBService.saveFolder(folder); // DB에 저장
-    await _loadFolders(); // 다시 불러오기
+    await DBService.saveFolder(folder);
+    await _loadFolders();
   }
 
-  /// 필터 상태에 따라 정렬된 폴더 리스트 반환
+  Future<void> _renameFolder(FolderItem folder) async {
+    final name = await showDialog<String>(
+      context: context,
+      builder: (_) => CreateFolderDialog(initialName: folder.name, isRename: true),
+    );
+    if (!mounted) return;
+    if (name == null || name.isEmpty || name == folder.name) return;
+    folder.name = name;
+    await DBService.saveFolder(folder);
+    await _loadFolders();
+  }
+
+  Future<void> _deleteFolder(FolderItem folder) async {
+    await DBService.deleteFolder(folder.id);
+    await _loadFolders();
+  }
+
+  // ── 정렬 ────────────────────────────────────────────────────────────
   List<FolderItem> get _sorted {
-    final list = List<FolderItem>.from(_folders);
     switch (_filter) {
       case FolderSortFilter.name:
-        list.sort((a, b) => a.name.compareTo(b.name));
+        return List<FolderItem>.from(_folders)..sort((a, b) => a.name.compareTo(b.name));
       case FolderSortFilter.recent:
-        list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      case FolderSortFilter.total:
+        return List<FolderItem>.from(_folders)..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       case FolderSortFilter.custom:
-        break;
+        return _customOrderedFolders;
+      case FolderSortFilter.total:
+        return List<FolderItem>.from(_folders);
     }
-    return list;
   }
 
+  // ── 화면 빌드 ───────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -97,6 +147,7 @@ class _FolderScreenState extends State<FolderScreen> {
             ),
           ),
           actions: [
+            // 폴더 추가 버튼
             GestureDetector(
               onTap: _showCreateDialog,
               behavior: HitTestBehavior.opaque,
@@ -105,6 +156,7 @@ class _FolderScreenState extends State<FolderScreen> {
                 child: Icon(Icons.add, color: AppColors.textPrimary),
               ),
             ),
+            // 더보기 버튼 (미구현)
             GestureDetector(
               onTap: () {},
               behavior: HitTestBehavior.opaque,
@@ -117,22 +169,32 @@ class _FolderScreenState extends State<FolderScreen> {
         ),
         body: Column(
           children: [
+            // 정렬 필터 행
             FolderFilterRow(
               total: _folders.length,
               selectedFilter: _filter,
               onSelected: (f) => setState(() => _filter = f),
             ),
+            // 폴더 그리드
             Expanded(
               child: FolderGrid(
                 folders: _sorted,
                 onAddTap: _showCreateDialog,
-                onFolderTap: (folder) {
-                  Navigator.of(context).push(
+                onRenameTap: _renameFolder,
+                onFolderTap: (folder) async {
+                  await Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => InFolderScreen(folder: folder),
+                      builder: (_) => InFolderScreen(
+                        folder: folder,
+                        onContentSaved: widget.onContentSaved,
+                      ),
                     ),
                   );
+                  _loadFolders();
                 },
+                onDeleteTap: _deleteFolder,
+                isReorderable: _filter == FolderSortFilter.custom,
+                onReorder: _onReorder,
               ),
             ),
           ],

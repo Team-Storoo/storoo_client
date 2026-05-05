@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../models/content.dart';
 
-/// 메모 탭 컨텐츠
-///
-/// 저장된 메모 목록을 표시합니다.
-/// 데이터가 없을 경우 빈 상태 메시지를 표시합니다.
 class InFolderMemoList extends StatelessWidget {
-  final String searchQuery;
+  final List<Content> items;
+  final Future<void> Function(int id) onDelete;
+  final String folderName;
+  final void Function(Content item)? onTap;
 
-  const InFolderMemoList({super.key, required this.searchQuery});
+  const InFolderMemoList({
+    super.key,
+    required this.items,
+    required this.onDelete,
+    required this.folderName,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // TODO: 실제 메모 데이터 연결 시 List<MemoItem>으로 교체
-    const items = <String>[];
-
     if (items.isEmpty) {
       return const Center(
         child: Text(
@@ -29,9 +32,122 @@ class InFolderMemoList extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
       itemCount: items.length,
-      itemBuilder: (_, i) => const SizedBox.shrink(),
+      itemBuilder: (_, i) => _MemoCard(
+        item: items[i],
+        onDelete: onDelete,
+        onTap: onTap,
+      ),
+    );
+  }
+}
+
+class _MemoCard extends StatelessWidget {
+  final Content item;
+  final Future<void> Function(int id) onDelete;
+  final void Function(Content item)? onTap;
+
+  const _MemoCard({required this.item, required this.onDelete, this.onTap});
+
+  void _showDeleteMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.delete_outline, color: AppColors.error),
+              title: const Text(
+                '삭제',
+                style: TextStyle(fontFamily: 'Pretendard', color: AppColors.error),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                onDelete(item.id);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime dt) {
+    return '${dt.year}.${dt.month.toString().padLeft(2, '0')}.${dt.day.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => onTap?.call(item),
+      onLongPress: () => _showDeleteMenu(context),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.divider),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF3E0),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.sticky_note_2_outlined, color: Color(0xFFFF9800), size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  if (item.content != null && item.content!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      item.content!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'Pretendard',
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 6),
+                  Text(
+                    _formatDate(item.createdAt),
+                    style: const TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

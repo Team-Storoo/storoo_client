@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
+import '/models/folder_item.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '/models/folder_item.dart';
 
-
-/// 폴더 그리드 단일 카드 위젯
+/// 폴더 목록의 개별 카드
 class FolderCard extends StatelessWidget {
-  const FolderCard({super.key, required this.folder, required this.onTap});
-
   final FolderItem folder;
   final VoidCallback onTap;
+  final ValueChanged<FolderItem>? onDeleteTap;
+  final ValueChanged<FolderItem>? onRenameTap;
 
+  const FolderCard({
+    super.key,
+    required this.folder,
+    required this.onTap,
+    this.onDeleteTap,
+    this.onRenameTap,
+  });
+
+  // ── 화면 빌드 ─────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

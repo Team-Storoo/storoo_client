@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
-/// 폴더 생성 다이얼로그
+/// 폴더 생성 / 이름 수정 다이얼로그
+/// isRename: true → 제목 "폴더 이름 수정", 확인 버튼 "수정"
+/// isRename: false → 제목 "폴더 생성", 확인 버튼 "추가"
 class CreateFolderDialog extends StatefulWidget {
-  const CreateFolderDialog({super.key});
+  final String initialName;
+  final bool isRename;
+
+  const CreateFolderDialog({super.key, this.initialName = '', this.isRename = false});
 
   @override
   State<CreateFolderDialog> createState() => _CreateFolderDialogState();
 }
 
 class _CreateFolderDialogState extends State<CreateFolderDialog> {
-  final _ctrl = TextEditingController();
+  late final TextEditingController _ctrl;
   static const int _maxLength = 15;
+
+  // ── 초기화 / 해제 ──────────────────────────────────────────────────
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = TextEditingController(text: widget.initialName);
+  }
 
   @override
   void dispose() {
@@ -19,6 +31,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
     super.dispose();
   }
 
+  // ── 화면 빌드 ─────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -30,9 +43,10 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(
+            // 다이얼로그 제목
+            Center(
               child: Text(
-                '폴더 생성',
+                widget.isRename ? '폴더 이름 수정' : '폴더 생성',
                 style: TextStyle(
                   fontFamily: 'Pretendard',
                   fontSize: 16,
@@ -42,6 +56,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
               ),
             ),
             const SizedBox(height: 20),
+            // 입력 필드 레이블
             const Text(
               '폴더 이름',
               style: TextStyle(
@@ -82,6 +97,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
               ),
             ),
             const SizedBox(height: 4),
+            // 취소 / 확인 버튼 행
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -112,8 +128,8 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
                     splashFactory: NoSplash.splashFactory,
                     disabledForegroundColor: const Color(0xFFCCCCCC),
                   ),
-                  child: const Text(
-                    '추가',
+                  child: Text(
+                    widget.isRename ? '수정' : '추가',
                     style: TextStyle(
                       fontFamily: 'Pretendard',
                       fontSize: 15,

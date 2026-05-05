@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
+// ── 정렬 필터 열거형 ────────────────────────────────────────────────────
 enum FolderSortFilter { total, name, recent, custom }
 
 /// 폴더 화면 정렬 필터 버튼 행
@@ -17,6 +18,7 @@ class FolderFilterRow extends StatelessWidget {
   final FolderSortFilter selectedFilter;
   final ValueChanged<FolderSortFilter> onSelected;
 
+  // ── 화면 빌드 ─────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final items = [
@@ -29,6 +31,7 @@ class FolderFilterRow extends StatelessWidget {
     return Container(
       color: Colors.white,
       width: double.infinity,
+      // 가로 스크롤 필터 목록
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -37,6 +40,7 @@ class FolderFilterRow extends StatelessWidget {
               items.map((item) {
                 final (filter, label) = item;
                 final isSelected = filter == selectedFilter;
+                // 개별 필터 칩
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: GestureDetector(
