@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../folder_item.dart';
+import '../../../models/content.dart';
+import '../../../models/folder_item.dart';
+import '../../../services/db_service.dart';
 import '../../folder/widgets/create_folder_dialog.dart';
-import '../save_dummy_data.dart';
 import '../widgets/dashed_border.dart';
 import '../widgets/folder_selector.dart';
 import '../widgets/memo_field.dart';
@@ -15,33 +16,41 @@ import '../widgets/save_button.dart';
 /// 이미지 저장 화면
 /// 필수: 이미지 1장 이상(최대 5장), 제목, 저장 폴더
 /// 선택: 메모(최대 200자), 태그
-class ImageSaveScreen extends StatefulWidget {
-  const ImageSaveScreen({super.key});
+class SaveImageScreen extends StatefulWidget {
+  final VoidCallback? onSaved;
+
+  const SaveImageScreen({super.key, this.onSaved});
 
   @override
-  State<ImageSaveScreen> createState() => _ImageSaveScreenState();
+  State<SaveImageScreen> createState() => _SaveImageScreenState();
 }
 
-class _ImageSaveScreenState extends State<ImageSaveScreen> {
+class _SaveImageScreenState extends State<SaveImageScreen> {
   final _titleCtrl = TextEditingController();
   final _memoCtrl = TextEditingController();
 
-  late List<FolderItem> _folders;
-  String? _selectedFolderId;
+  List<FolderItem> _folders = [];
+  FolderItem? _selectedFolder;
   final List<String> _tags = [];
 
   final List<XFile> _images = [];
   static const int _maxImages = 5;
 
+  bool _loadingFolders = true;
+  bool _saving = false;
+
+  static const int _maxFolders = 5;
+
   bool get _canSave =>
       _images.isNotEmpty &&
       _titleCtrl.text.trim().isNotEmpty &&
-      _selectedFolderId != null;
+      _selectedFolder != null;
 
   @override
   void initState() {
     super.initState();
-    _folders = createDummyFolders();
+    _loadFolders();
+    _titleCtrl.addListener(() => setState(() {}));
   }
 
   @override
@@ -49,6 +58,46 @@ class _ImageSaveScreenState extends State<ImageSaveScreen> {
     _titleCtrl.dispose();
     _memoCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadFolders() async {
+    final folders = await DBService.getFolders();
+    if (mounted) {
+      setState(() {
+        _folders = folders;
+        _selectedFolder ??= folders.isNotEmpty ? folders.first : null;
+        _loadingFolders = false;
+      });
+    }
+  }
+
+  Future<void> _createFolder() async {
+    if (_folders.length >= _maxFolders) {
+      _showSnack('폴더는 최대 $_maxFolders개까지 만들 수 있어요.');
+      return;
+    }
+    final name = await showDialog<String>(
+      context: context,
+      builder: (_) => const CreateFolderDialog(),
+    );
+    if (name == null || name.isEmpty || !mounted) return;
+    final folder =
+        FolderItem()
+          ..name = name
+          ..createdAt = DateTime.now()
+          ..itemCount = 0;
+    await DBService.saveFolder(folder);
+    final newId = folder.id;
+    final updated = await DBService.getFolders();
+    if (mounted) {
+      setState(() {
+        _folders = updated;
+        _selectedFolder = _folders.firstWhere(
+          (f) => f.id == newId,
+          orElse: () => _folders.last,
+        );
+      });
+    }
   }
 
   void _addImage() async {
@@ -66,32 +115,43 @@ class _ImageSaveScreenState extends State<ImageSaveScreen> {
     setState(() => _images.removeAt(index));
   }
 
-  Future<void> _showAddFolderDialog() async {
-    final name = await showDialog<String>(
-      context: context,
-      builder: (_) => const CreateFolderDialog(),
-    );
-    if (name == null || name.isEmpty) return;
-    setState(() {
-      _folders.add(
-        FolderItem(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          name: name,
-          createdAt: DateTime.now(),
-        ),
-      );
-    });
-  }
-
   Future<void> _showAddTagDialog() async {
     final tag = await TagAddDialog.show(context);
     if (tag == null || tag.isEmpty) return;
     setState(() => _tags.add(tag));
   }
 
-  void _onSave() {
-    // TODO: DB 연동 시 실제 저장 로직 추가
-    Navigator.pop(context);
+  Future<void> _save() async {
+    if (_saving) return;
+    setState(() => _saving = true);
+    final memo = _memoCtrl.text.trim();
+    final title = _titleCtrl.text.trim();
+    for (final image in _images) {
+      final content =
+          Content()
+            ..type = 'image'
+            ..folderId = _selectedFolder!.id
+            ..title = title
+            ..imageUrl = image.path
+            ..content = memo.isEmpty ? null : memo
+            ..tags = List.from(_tags)
+            ..createdAt = DateTime.now();
+      await DBService.saveContentToFolder(content);
+    }
+    if (mounted) {
+      setState(() => _saving = false);
+      widget.onSaved?.call();
+      Navigator.of(context).pop();
+    }
+  }
+
+  void _showSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg, style: const TextStyle(fontFamily: 'Pretendard')),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
@@ -168,12 +228,20 @@ class _ImageSaveScreenState extends State<ImageSaveScreen> {
                     const SizedBox(height: 20),
 
                     // ── 저장 폴더 ──
-                    FolderSelector(
-                      folders: _folders,
-                      selectedFolderId: _selectedFolderId,
-                      onSelect: (id) => setState(() => _selectedFolderId = id),
-                      onAddFolder: _showAddFolderDialog,
-                    ),
+                    if (_loadingFolders)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    else
+                      FolderSelector(
+                        folders: _folders,
+                        selectedFolder: _selectedFolder,
+                        onSelect: (f) => setState(() => _selectedFolder = f),
+                        onAddFolder: _createFolder,
+                      ),
                     const SizedBox(height: 20),
 
                     // ── 메모 ──
@@ -203,7 +271,7 @@ class _ImageSaveScreenState extends State<ImageSaveScreen> {
                 20,
                 MediaQuery.of(context).padding.bottom + 16,
               ),
-              child: SaveButton(enabled: _canSave, onTap: _onSave),
+              child: SaveButton(enabled: _canSave && !_saving, onTap: _save),
             ),
           ],
         ),

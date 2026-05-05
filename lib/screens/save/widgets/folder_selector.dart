@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../folder_item.dart';
+import '../../../models/folder_item.dart';
 
 /// 저장 폴더 선택 위젯
 /// - 2열 그리드로 폴더 목록 표시
@@ -11,14 +11,14 @@ class FolderSelector extends StatelessWidget {
   const FolderSelector({
     super.key,
     required this.folders,
-    required this.selectedFolderId,
+    this.selectedFolder,
     required this.onSelect,
     required this.onAddFolder,
   });
 
   final List<FolderItem> folders;
-  final String? selectedFolderId;
-  final ValueChanged<String> onSelect;
+  final FolderItem? selectedFolder;
+  final ValueChanged<FolderItem> onSelect;
   final VoidCallback onAddFolder;
 
   static const _labelStyle = TextStyle(
@@ -73,9 +73,9 @@ class FolderSelector extends StatelessWidget {
           itemCount: folders.length,
           itemBuilder: (_, i) {
             final folder = folders[i];
-            final isSelected = folder.id == selectedFolderId;
+            final isSelected = folder.id == selectedFolder?.id;
             return GestureDetector(
-              onTap: () => onSelect(folder.id),
+              onTap: () => onSelect(folder),
               child: Container(
                 alignment: Alignment.center,
                 padding: const EdgeInsets.symmetric(horizontal: 8),

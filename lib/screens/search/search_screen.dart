@@ -37,7 +37,6 @@ class _SearchScreenState extends State<SearchScreen> {
         _contentResults = [];
       });
       return;
-
     }
 
     final folders = await DBService.getFolders();
@@ -49,15 +48,20 @@ class _SearchScreenState extends State<SearchScreen> {
     final matchedFolders =
         folders.where((f) => f.name.toLowerCase().contains(q)).toList();
 
-    final matchedContents = contents
-        .where((c) =>
-            c.title.toLowerCase().contains(q) ||
-            (c.url?.toLowerCase().contains(q) ?? false) ||
-            (c.content?.toLowerCase().contains(q) ?? false) ||
-            (c.description?.toLowerCase().contains(q) ?? false))
-        .where((c) => c.folderId != null && folderMap.containsKey(c.folderId))
-        .map((c) => (content: c, folder: folderMap[c.folderId]!))
-        .toList();
+    final matchedContents =
+        contents
+            .where(
+              (c) =>
+                  c.title.toLowerCase().contains(q) ||
+                  (c.url?.toLowerCase().contains(q) ?? false) ||
+                  (c.content?.toLowerCase().contains(q) ?? false) ||
+                  (c.description?.toLowerCase().contains(q) ?? false),
+            )
+            .where(
+              (c) => c.folderId != null && folderMap.containsKey(c.folderId),
+            )
+            .map((c) => (content: c, folder: folderMap[c.folderId]!))
+            .toList();
 
     setState(() {
       _folderResults = matchedFolders;
@@ -66,9 +70,9 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _goToFolder(FolderItem folder) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => InFolderScreen(folder: folder)),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => InFolderScreen(folder: folder)));
   }
 
   void _goToContent(FolderItem folder, Content content) {
@@ -79,11 +83,12 @@ class _SearchScreenState extends State<SearchScreen> {
     };
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => InFolderScreen(
-          folder: folder,
-          initialTab: tab,
-          initialQuery: _query,
-        ),
+        builder:
+            (_) => InFolderScreen(
+              folder: folder,
+              initialTab: tab,
+              initialQuery: _query,
+            ),
       ),
     );
   }
@@ -133,7 +138,11 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.search_off, size: 48, color: AppColors.navUnselected),
+            const Icon(
+              Icons.search_off,
+              size: 48,
+              color: AppColors.navUnselected,
+            ),
             const SizedBox(height: 12),
             Text('"$_query" 검색 결과가 없어요', style: AppTextStyles.caption),
           ],
@@ -146,18 +155,19 @@ class _SearchScreenState extends State<SearchScreen> {
       children: [
         if (_folderResults.isNotEmpty) ...[
           _SectionLabel(label: '폴더', count: _folderResults.length),
-          ..._folderResults.map((f) => _FolderResultTile(
-                folder: f,
-                onTap: () => _goToFolder(f),
-              )),
+          ..._folderResults.map(
+            (f) => _FolderResultTile(folder: f, onTap: () => _goToFolder(f)),
+          ),
         ],
         if (_contentResults.isNotEmpty) ...[
           _SectionLabel(label: '폴더 내 항목', count: _contentResults.length),
-          ..._contentResults.map((r) => _ContentResultTile(
-                content: r.content,
-                folderName: r.folder.name,
-                onTap: () => _goToContent(r.folder, r.content),
-              )),
+          ..._contentResults.map(
+            (r) => _ContentResultTile(
+              content: r.content,
+              folderName: r.folder.name,
+              onTap: () => _goToContent(r.folder, r.content),
+            ),
+          ),
         ],
       ],
     );
@@ -178,21 +188,25 @@ class _SectionLabel extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
       child: Row(
         children: [
-          Text(label,
-              style: const TextStyle(
-                fontFamily: 'Pretendard',
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              )),
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Pretendard',
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
           const SizedBox(width: 6),
-          Text('$count',
-              style: const TextStyle(
-                fontFamily: 'Pretendard',
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
-              )),
+          Text(
+            '$count',
+            style: const TextStyle(
+              fontFamily: 'Pretendard',
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
+          ),
         ],
       ),
     );
@@ -221,26 +235,38 @@ class _FolderResultTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.folder_outlined, color: AppColors.primary, size: 22),
+            const Icon(
+              Icons.folder_outlined,
+              color: AppColors.primary,
+              size: 22,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(folder.name,
-                      style: const TextStyle(
-                        fontFamily: 'Pretendard',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      )),
+                  Text(
+                    folder.name,
+                    style: const TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text('저장된 항목 ${folder.itemCount}개',
-                      style: AppTextStyles.caption),
+                  Text(
+                    '저장된 항목 ${folder.itemCount}개',
+                    style: AppTextStyles.caption,
+                  ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 20),
+            const Icon(
+              Icons.chevron_right,
+              color: AppColors.textSecondary,
+              size: 20,
+            ),
           ],
         ),
       ),
@@ -327,8 +353,11 @@ class _ContentResultTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.folder_outlined,
-                          size: 12, color: AppColors.textSecondary),
+                      const Icon(
+                        Icons.folder_outlined,
+                        size: 12,
+                        color: AppColors.textSecondary,
+                      ),
                       const SizedBox(width: 3),
                       Expanded(
                         child: Text(
@@ -354,8 +383,11 @@ class _ContentResultTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.chevron_right,
-                color: AppColors.textSecondary, size: 20),
+            const Icon(
+              Icons.chevron_right,
+              color: AppColors.textSecondary,
+              size: 20,
+            ),
           ],
         ),
       ),

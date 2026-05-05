@@ -46,7 +46,7 @@ class SaveTypeSheet extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const LinkSaveScreen()),
+                  MaterialPageRoute(builder: (_) => const SaveLinkScreen()),
                 );
               },
             ),
@@ -57,7 +57,7 @@ class SaveTypeSheet extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const ImageSaveScreen()),
+                  MaterialPageRoute(builder: (_) => const SaveImageScreen()),
                 );
               },
             ),
@@ -68,7 +68,7 @@ class SaveTypeSheet extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const NoteSaveScreen()),
+                  MaterialPageRoute(builder: (_) => const SaveNoteScreen()),
                 );
               },
             ),

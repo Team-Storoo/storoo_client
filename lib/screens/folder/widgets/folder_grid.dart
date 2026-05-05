@@ -135,7 +135,8 @@ class _ReorderableGridState extends State<_ReorderableGrid> {
               data: i,
               delay: const Duration(milliseconds: 300),
               onDragStarted: () => setState(() => _draggingIndex = i),
-              onDraggableCanceled: (_, __) => setState(() => _draggingIndex = null),
+              onDraggableCanceled:
+                  (_, __) => setState(() => _draggingIndex = null),
               onDragEnd: (_) => setState(() => _draggingIndex = null),
               // 드래그 중 떠다니는 카드
               feedback: Material(
@@ -165,13 +166,17 @@ class _ReorderableGridState extends State<_ReorderableGrid> {
                 duration: const Duration(milliseconds: 150),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  border: isHovered
-                      ? Border.all(color: AppColors.primary, width: 2)
-                      : Border.all(color: Colors.transparent),
+                  border:
+                      isHovered
+                          ? Border.all(color: AppColors.primary, width: 2)
+                          : Border.all(color: Colors.transparent),
                 ),
                 child: FolderCard(
                   folder: folder,
-                  onTap: _draggingIndex == null ? () => widget.onFolderTap(folder) : () {},
+                  onTap:
+                      _draggingIndex == null
+                          ? () => widget.onFolderTap(folder)
+                          : () {},
                   onDeleteTap: widget.onDeleteTap,
                   onRenameTap: widget.onRenameTap,
                 ),
@@ -204,7 +209,11 @@ class _AddCard extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.create_new_folder, color: AppColors.primary, size: 32),
+              const Icon(
+                Icons.create_new_folder,
+                color: AppColors.primary,
+                size: 32,
+              ),
               const SizedBox(height: 8),
               Text(
                 '폴더 추가하기',
@@ -245,11 +254,17 @@ class _EmptyState extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.add_circle, color: AppColors.primary, size: 18),
+                  const Icon(
+                    Icons.add_circle,
+                    color: AppColors.primary,
+                    size: 18,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     '폴더 추가하기',
-                    style: AppTextStyles.body.copyWith(color: AppColors.primary),
+                    style: AppTextStyles.body.copyWith(
+                      color: AppColors.primary,
+                    ),
                   ),
                 ],
               ),

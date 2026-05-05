@@ -63,9 +63,7 @@ class _AppShellState extends State<AppShell> {
       screen = SaveNoteScreen(onSaved: onSaved);
     }
 
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => screen),
-    );
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
   }
 
   @override
