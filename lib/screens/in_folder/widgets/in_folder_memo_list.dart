@@ -5,11 +5,15 @@ import '../../../models/content.dart';
 class InFolderMemoList extends StatelessWidget {
   final List<Content> items;
   final Future<void> Function(int id) onDelete;
+  final String folderName;
+  final void Function(Content item)? onTap;
 
   const InFolderMemoList({
     super.key,
     required this.items,
     required this.onDelete,
+    required this.folderName,
+    this.onTap,
   });
 
   @override
@@ -30,7 +34,11 @@ class InFolderMemoList extends StatelessWidget {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
       itemCount: items.length,
-      itemBuilder: (_, i) => _MemoCard(item: items[i], onDelete: onDelete),
+      itemBuilder: (_, i) => _MemoCard(
+        item: items[i],
+        onDelete: onDelete,
+        onTap: onTap,
+      ),
     );
   }
 }
@@ -38,8 +46,9 @@ class InFolderMemoList extends StatelessWidget {
 class _MemoCard extends StatelessWidget {
   final Content item;
   final Future<void> Function(int id) onDelete;
+  final void Function(Content item)? onTap;
 
-  const _MemoCard({required this.item, required this.onDelete});
+  const _MemoCard({required this.item, required this.onDelete, this.onTap});
 
   void _showDeleteMenu(BuildContext context) {
     showModalBottomSheet(
@@ -72,6 +81,7 @@ class _MemoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: () => onTap?.call(item),
       onLongPress: () => _showDeleteMenu(context),
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),

@@ -3,6 +3,7 @@ import '../../core/theme/app_colors.dart';
 import '../../models/content.dart';
 import '../../models/folder_item.dart';
 import '../../services/db_service.dart';
+import '../content_detail/content_detail_screen.dart';
 import '../save/save_content_sheet.dart';
 import 'widgets/in_folder_tab_bar.dart';
 import 'widgets/in_folder_search_bar.dart';
@@ -101,6 +102,18 @@ class _InFolderScreenState extends State<InFolderScreen> {
     }
   }
 
+  Future<void> _openDetail(Content item) async {
+    final changed = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => ContentDetailScreen(
+          item: item,
+          folderName: widget.folder.name,
+        ),
+      ),
+    );
+    if (changed == true) _loadContents();
+  }
+
   Widget _buildTabContent() {
     switch (_selectedTab) {
       case 0:
@@ -108,16 +121,21 @@ class _InFolderScreenState extends State<InFolderScreen> {
           items: _filtered(_links),
           onDelete: _deleteContent,
           folderName: widget.folder.name,
+          onTap: _openDetail,
         );
       case 1:
         return InFolderImageGrid(
           items: _filtered(_images),
           onDelete: _deleteContent,
+          folderName: widget.folder.name,
+          onTap: _openDetail,
         );
       case 2:
         return InFolderMemoList(
           items: _filtered(_memos),
           onDelete: _deleteContent,
+          folderName: widget.folder.name,
+          onTap: _openDetail,
         );
       default:
         return const SizedBox.shrink();

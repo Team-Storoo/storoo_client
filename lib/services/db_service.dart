@@ -188,6 +188,31 @@ class DBService {
         .findAll();
   }
 
+  static Future<FolderItem?> getFolderById(int id) async {
+    if (kIsWeb) return null;
+    return await isar.folderItems.get(id);
+  }
+
+  /// Content 필드 업데이트 (title, content, tags 등)
+  static Future<void> updateContent(Content content) async {
+    if (kIsWeb) return;
+    await isar.writeTxn(() async {
+      await isar.contents.put(content);
+    });
+  }
+
+  /// Content 폴더 이동 (이전/새 폴더 itemCount 동기화)
+  static Future<void> moveContentToFolder(Content content, int oldFolderId) async {
+    if (kIsWeb) return;
+    await isar.writeTxn(() async {
+      await isar.contents.put(content);
+    });
+    await _syncFolderCount(oldFolderId);
+    if (content.folderId != null) {
+      await _syncFolderCount(content.folderId!);
+    }
+  }
+
   static Future<void> deleteFolder(int id) async {
     await isar.writeTxn(() async {
       await isar.folderItems.delete(id);

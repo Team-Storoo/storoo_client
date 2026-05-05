@@ -6,11 +6,15 @@ import '../../../models/content.dart';
 class InFolderImageGrid extends StatelessWidget {
   final List<Content> items;
   final Future<void> Function(int id) onDelete;
+  final String folderName;
+  final void Function(Content item)? onTap;
 
   const InFolderImageGrid({
     super.key,
     required this.items,
     required this.onDelete,
+    required this.folderName,
+    this.onTap,
   });
 
   @override
@@ -37,7 +41,11 @@ class InFolderImageGrid extends StatelessWidget {
         childAspectRatio: 0.85,
       ),
       itemCount: items.length,
-      itemBuilder: (_, i) => _ImageCard(item: items[i], onDelete: onDelete),
+      itemBuilder: (_, i) => _ImageCard(
+        item: items[i],
+        onDelete: onDelete,
+        onTap: onTap,
+      ),
     );
   }
 }
@@ -45,8 +53,9 @@ class InFolderImageGrid extends StatelessWidget {
 class _ImageCard extends StatelessWidget {
   final Content item;
   final Future<void> Function(int id) onDelete;
+  final void Function(Content item)? onTap;
 
-  const _ImageCard({required this.item, required this.onDelete});
+  const _ImageCard({required this.item, required this.onDelete, this.onTap});
 
   void _showDeleteMenu(BuildContext context) {
     showModalBottomSheet(
@@ -75,6 +84,7 @@ class _ImageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: () => onTap?.call(item),
       onLongPress: () => _showDeleteMenu(context),
       child: Container(
         decoration: BoxDecoration(

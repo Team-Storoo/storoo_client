@@ -7,12 +7,14 @@ class InFolderLinkList extends StatelessWidget {
   final List<Content> items;
   final Future<void> Function(int id) onDelete;
   final String folderName;
+  final void Function(Content item)? onTap;
 
   const InFolderLinkList({
     super.key,
     required this.items,
     required this.onDelete,
     required this.folderName,
+    this.onTap,
   });
 
   @override
@@ -37,6 +39,7 @@ class InFolderLinkList extends StatelessWidget {
         item: items[i],
         folderName: folderName,
         onDelete: onDelete,
+        onTap: onTap,
       ),
     );
   }
@@ -46,11 +49,13 @@ class _LinkCard extends StatelessWidget {
   final Content item;
   final String folderName;
   final Future<void> Function(int id) onDelete;
+  final void Function(Content item)? onTap;
 
   const _LinkCard({
     required this.item,
     required this.folderName,
     required this.onDelete,
+    this.onTap,
   });
 
   void _showDeleteMenu(BuildContext context) {
@@ -135,6 +140,7 @@ class _LinkCard extends StatelessWidget {
     final dateSource = source.isNotEmpty ? '$dateStr | $source' : dateStr;
 
     return GestureDetector(
+      onTap: () => onTap?.call(item),
       onLongPress: () => _showDeleteMenu(context),
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
