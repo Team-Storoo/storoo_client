@@ -20,16 +20,19 @@ class FolderScreen extends StatefulWidget {
 }
 
 class FolderScreenState extends State<FolderScreen> {
+  // ── 상태 ────────────────────────────────────────────────────────────
   List<FolderItem> _folders = [];
   List<FolderItem> _customOrderedFolders = [];
   FolderSortFilter _filter = FolderSortFilter.total;
 
+  // ── 초기화 ──────────────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
     _loadFolders();
   }
 
+  // ── 데이터 로드 ─────────────────────────────────────────────────────
   Future<void> refresh() => _loadFolders();
 
   Future<void> _loadFolders() async {
@@ -46,6 +49,7 @@ class FolderScreenState extends State<FolderScreen> {
     });
   }
 
+  // ── 사용자 지정 순서 ────────────────────────────────────────────────
   List<FolderItem> _buildCustomOrder(List<FolderItem> folders, List<int> orderedIds) {
     if (orderedIds.isEmpty) return List.from(folders);
     final map = {for (final f in folders) f.id: f};
@@ -64,7 +68,7 @@ class FolderScreenState extends State<FolderScreen> {
     );
   }
 
-  /// 폴더 생성 다이얼로그 띄우고 DB에 저장
+  // ── 폴더 CRUD ───────────────────────────────────────────────────────
   Future<void> _showCreateDialog() async {
     final name = await showDialog<String>(
       context: context,
@@ -85,11 +89,10 @@ class FolderScreenState extends State<FolderScreen> {
       ..name = name
       ..createdAt = DateTime.now();
 
-    await DBService.saveFolder(folder); // DB에 저장
-    await _loadFolders(); // 다시 불러오기
+    await DBService.saveFolder(folder);
+    await _loadFolders();
   }
 
-  /// 폴더 이름 수정
   Future<void> _renameFolder(FolderItem folder) async {
     final name = await showDialog<String>(
       context: context,
@@ -102,13 +105,12 @@ class FolderScreenState extends State<FolderScreen> {
     await _loadFolders();
   }
 
-  /// 폴더 삭제 함수
   Future<void> _deleteFolder(FolderItem folder) async {
-    await DBService.deleteFolder(folder.id); // DB에서 삭제
-    await _loadFolders(); // 목록 갱신
+    await DBService.deleteFolder(folder.id);
+    await _loadFolders();
   }
 
-
+  // ── 정렬 ────────────────────────────────────────────────────────────
   List<FolderItem> get _sorted {
     switch (_filter) {
       case FolderSortFilter.name:
@@ -122,6 +124,7 @@ class FolderScreenState extends State<FolderScreen> {
     }
   }
 
+  // ── 화면 빌드 ───────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -144,6 +147,7 @@ class FolderScreenState extends State<FolderScreen> {
             ),
           ),
           actions: [
+            // 폴더 추가 버튼
             GestureDetector(
               onTap: _showCreateDialog,
               behavior: HitTestBehavior.opaque,
@@ -152,6 +156,7 @@ class FolderScreenState extends State<FolderScreen> {
                 child: Icon(Icons.add, color: AppColors.textPrimary),
               ),
             ),
+            // 더보기 버튼 (미구현)
             GestureDetector(
               onTap: () {},
               behavior: HitTestBehavior.opaque,
@@ -164,11 +169,13 @@ class FolderScreenState extends State<FolderScreen> {
         ),
         body: Column(
           children: [
+            // 정렬 필터 행
             FolderFilterRow(
               total: _folders.length,
               selectedFilter: _filter,
               onSelected: (f) => setState(() => _filter = f),
             ),
+            // 폴더 그리드
             Expanded(
               child: FolderGrid(
                 folders: _sorted,

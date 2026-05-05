@@ -4,6 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import './folder_card.dart';
 
+/// 폴더 그리드 (일반 / 드래그 재정렬)
 class FolderGrid extends StatelessWidget {
   const FolderGrid({
     super.key,
@@ -24,11 +25,14 @@ class FolderGrid extends StatelessWidget {
   final bool isReorderable;
   final void Function(int oldIndex, int newIndex)? onReorder;
 
+  // ── 화면 빌드 ─────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    // 폴더 없음 → 빈 상태
     if (folders.isEmpty) {
       return _EmptyState(onAddTap: onAddTap);
     }
+    // 사용자 지정순 → 드래그 재정렬 그리드
     if (isReorderable) {
       return _ReorderableGrid(
         folders: folders,
@@ -39,6 +43,7 @@ class FolderGrid extends StatelessWidget {
         onReorder: onReorder!,
       );
     }
+    // 일반 그리드
     return GridView.builder(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -58,6 +63,7 @@ class FolderGrid extends StatelessWidget {
             onRenameTap: onRenameTap,
           );
         }
+        // 마지막 셀 → 폴더 추가 카드
         return _AddCard(onTap: onAddTap);
       },
     );
@@ -88,6 +94,7 @@ class _ReorderableGrid extends StatefulWidget {
 }
 
 class _ReorderableGridState extends State<_ReorderableGrid> {
+  // 현재 드래그 중인 카드 인덱스
   int? _draggingIndex;
 
   @override
@@ -106,12 +113,14 @@ class _ReorderableGridState extends State<_ReorderableGrid> {
       ),
       itemCount: widget.folders.length + 1,
       itemBuilder: (context, i) {
+        // 마지막 셀 → 폴더 추가 카드
         if (i == widget.folders.length) {
           return _AddCard(onTap: widget.onAddTap);
         }
 
         final folder = widget.folders[i];
 
+        // 드롭 영역
         return DragTarget<int>(
           onWillAccept: (fromIndex) => fromIndex != null && fromIndex != i,
           onAccept: (fromIndex) {
@@ -121,12 +130,14 @@ class _ReorderableGridState extends State<_ReorderableGrid> {
           builder: (context, candidateData, _) {
             final isHovered = candidateData.isNotEmpty;
 
+            // 드래그 소스
             return LongPressDraggable<int>(
               data: i,
               delay: const Duration(milliseconds: 300),
               onDragStarted: () => setState(() => _draggingIndex = i),
               onDraggableCanceled: (_, __) => setState(() => _draggingIndex = null),
               onDragEnd: (_) => setState(() => _draggingIndex = null),
+              // 드래그 중 떠다니는 카드
               feedback: Material(
                 color: Colors.transparent,
                 child: SizedBox(
@@ -141,6 +152,7 @@ class _ReorderableGridState extends State<_ReorderableGrid> {
                   ),
                 ),
               ),
+              // 원래 자리 빈 슬롯
               childWhenDragging: Container(
                 decoration: BoxDecoration(
                   color: AppColors.primaryLight,
@@ -148,6 +160,7 @@ class _ReorderableGridState extends State<_ReorderableGrid> {
                   border: Border.all(color: AppColors.primary, width: 1.5),
                 ),
               ),
+              // 일반 상태 / 호버 강조
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 decoration: BoxDecoration(
@@ -173,6 +186,7 @@ class _ReorderableGridState extends State<_ReorderableGrid> {
 
 // ── 공통 위젯 ─────────────────────────────────────────────────────────
 
+/// 폴더 추가 카드
 class _AddCard extends StatelessWidget {
   const _AddCard({required this.onTap});
   final VoidCallback onTap;
@@ -204,6 +218,7 @@ class _AddCard extends StatelessWidget {
   }
 }
 
+/// 폴더가 없을 때 빈 상태 안내
 class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.onAddTap});
   final VoidCallback onAddTap;

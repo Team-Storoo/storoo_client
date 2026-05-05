@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
-/// 폴더 생성 다이얼로그
+/// 폴더 생성 / 이름 수정 다이얼로그
+/// isRename: true → 제목 "폴더 이름 수정", 확인 버튼 "수정"
+/// isRename: false → 제목 "폴더 생성", 확인 버튼 "추가"
 class CreateFolderDialog extends StatefulWidget {
   final String initialName;
   final bool isRename;
@@ -16,6 +18,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
   late final TextEditingController _ctrl;
   static const int _maxLength = 15;
 
+  // ── 초기화 / 해제 ──────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
@@ -28,6 +31,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
     super.dispose();
   }
 
+  // ── 화면 빌드 ─────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -39,6 +43,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 다이얼로그 제목
             Center(
               child: Text(
                 widget.isRename ? '폴더 이름 수정' : '폴더 생성',
@@ -51,6 +56,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
               ),
             ),
             const SizedBox(height: 20),
+            // 입력 필드 레이블
             const Text(
               '폴더 이름',
               style: TextStyle(
@@ -91,6 +97,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
               ),
             ),
             const SizedBox(height: 4),
+            // 취소 / 확인 버튼 행
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [

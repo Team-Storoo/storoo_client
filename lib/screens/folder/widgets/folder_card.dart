@@ -3,6 +3,7 @@ import '/models/folder_item.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
+/// 폴더 목록의 개별 카드
 class FolderCard extends StatelessWidget {
   final FolderItem folder;
   final VoidCallback onTap;
@@ -17,6 +18,7 @@ class FolderCard extends StatelessWidget {
     this.onRenameTap,
   });
 
+  // ── 화면 빌드 ─────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -28,7 +30,7 @@ class FolderCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // 폴더 이름과 내용
+            // 폴더 이름 · 항목 수
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -49,7 +51,7 @@ class FolderCard extends StatelessWidget {
                 ],
               ),
             ),
-            // ✅ 세로 점 메뉴 버튼
+            // 우상단 더보기 메뉴 (이름 수정 / 삭제)
             Positioned(
               right: 4,
               top: 4,
