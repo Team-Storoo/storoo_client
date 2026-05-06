@@ -4,7 +4,9 @@ import '../../models/content.dart';
 import '../../models/folder_item.dart';
 import '../../services/db_service.dart';
 import '../content_detail/content_detail_screen.dart';
-import '../save/save_content_sheet.dart';
+import '../save/link/link_save_screen.dart';
+import '../save/image/image_save_screen.dart';
+import '../save/note/note_save_screen.dart';
 import 'widgets/in_folder_tab_bar.dart';
 import 'widgets/in_folder_search_bar.dart';
 import 'widgets/in_folder_sort_header.dart';
@@ -57,7 +59,10 @@ class _InFolderScreenState extends State<InFolderScreen> {
 
   Future<void> _loadContents() async {
     final links = await DBService.getContentsByFolder(widget.folder.id, 'link');
-    final images = await DBService.getContentsByFolder(widget.folder.id, 'image');
+    final images = await DBService.getContentsByFolder(
+      widget.folder.id,
+      'image',
+    );
     final memos = await DBService.getContentsByFolder(widget.folder.id, 'memo');
     if (mounted) {
       setState(() {
@@ -74,15 +79,16 @@ class _InFolderScreenState extends State<InFolderScreen> {
   }
 
   List<Content> _filtered(List<Content> items) {
-    List<Content> result = _searchQuery.isEmpty
-        ? List<Content>.from(items)
-        : items.where((c) {
-            final q = _searchQuery.toLowerCase();
-            return c.title.toLowerCase().contains(q) ||
-                (c.url?.toLowerCase().contains(q) ?? false) ||
-                (c.content?.toLowerCase().contains(q) ?? false) ||
-                c.tags.any((t) => t.toLowerCase().contains(q));
-          }).toList();
+    List<Content> result =
+        _searchQuery.isEmpty
+            ? List<Content>.from(items)
+            : items.where((c) {
+              final q = _searchQuery.toLowerCase();
+              return c.title.toLowerCase().contains(q) ||
+                  (c.url?.toLowerCase().contains(q) ?? false) ||
+                  (c.content?.toLowerCase().contains(q) ?? false) ||
+                  c.tags.any((t) => t.toLowerCase().contains(q));
+            }).toList();
 
     switch (_sort) {
       case InFolderSort.newest:
@@ -97,20 +103,23 @@ class _InFolderScreenState extends State<InFolderScreen> {
 
   int get _currentCount {
     switch (_selectedTab) {
-      case 0: return _filtered(_links).length;
-      case 1: return _filtered(_images).length;
-      case 2: return _filtered(_memos).length;
-      default: return 0;
+      case 0:
+        return _filtered(_links).length;
+      case 1:
+        return _filtered(_images).length;
+      case 2:
+        return _filtered(_memos).length;
+      default:
+        return 0;
     }
   }
 
   Future<void> _openDetail(Content item) async {
     final changed = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => ContentDetailScreen(
-          item: item,
-          folderName: widget.folder.name,
-        ),
+        builder:
+            (_) =>
+                ContentDetailScreen(item: item, folderName: widget.folder.name),
       ),
     );
     if (changed == true) _loadContents();
@@ -145,19 +154,18 @@ class _InFolderScreenState extends State<InFolderScreen> {
   }
 
   void _openSaveSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => SaveContentSheet(
-        folderId: widget.folder.id,
-        folderName: widget.folder.name,
-        onSaved: () {
-          _loadContents();
-          widget.onContentSaved?.call();
-        },
-      ),
-    );
+    void onSaved() {
+      _loadContents();
+      widget.onContentSaved?.call();
+    }
+
+    final Widget screen = switch (_selectedTab) {
+      1 => SaveImageScreen(onSaved: onSaved, initialFolder: widget.folder),
+      2 => SaveNoteScreen(onSaved: onSaved, initialFolder: widget.folder),
+      _ => SaveLinkScreen(onSaved: onSaved, initialFolder: widget.folder),
+    };
+
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
   }
 
   @override
@@ -173,7 +181,9 @@ class _InFolderScreenState extends State<InFolderScreen> {
         floatingActionButton: FloatingActionButton(
           onPressed: _openSaveSheet,
           backgroundColor: AppColors.primary,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           elevation: 4,
           child: const Icon(Icons.add, color: Colors.white, size: 28),
         ),

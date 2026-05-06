@@ -103,63 +103,63 @@ class _TypePickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.divider,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                '무엇을 저장할까요?',
-                style: TextStyle(
-                  fontFamily: 'Pretendard',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.divider,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                _TypeOption(
-                  icon: Icons.link_rounded,
-                  label: '링크',
-                  iconColor: const Color(0xFF4A90E2),
-                  bgColor: const Color(0xFFEDF4FF),
-                  onTap: () => Navigator.of(context).pop('link'),
+              const SizedBox(height: 24),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '무엇을 저장할까요?',
+                  style: TextStyle(
+                    fontFamily: 'Pretendard',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-                const SizedBox(width: 12),
-                _TypeOption(
-                  icon: Icons.image_outlined,
-                  label: '이미지',
-                  iconColor: const Color(0xFF2DAB6F),
-                  bgColor: const Color(0xFFE8F8F0),
-                  onTap: () => Navigator.of(context).pop('image'),
-                ),
-                const SizedBox(width: 12),
-                _TypeOption(
-                  icon: Icons.edit_note_rounded,
-                  label: '노트',
-                  iconColor: const Color(0xFFE07B2A),
-                  bgColor: const Color(0xFFFFF3E8),
-                  onTap: () => Navigator.of(context).pop('note'),
-                ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  _TypeOption(
+                    icon: Icons.link_rounded,
+                    label: '링크',
+                    onTap: () => Navigator.of(context).pop('link'),
+                  ),
+                  const SizedBox(width: 12),
+                  _TypeOption(
+                    icon: Icons.image_outlined,
+                    label: '이미지',
+                    onTap: () => Navigator.of(context).pop('image'),
+                  ),
+                  const SizedBox(width: 12),
+                  _TypeOption(
+                    icon: Icons.edit_note_rounded,
+                    label: '노트',
+                    onTap: () => Navigator.of(context).pop('note'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -169,15 +169,11 @@ class _TypePickerSheet extends StatelessWidget {
 class _TypeOption extends StatelessWidget {
   final IconData icon;
   final String label;
-  final Color iconColor;
-  final Color bgColor;
   final VoidCallback onTap;
 
   const _TypeOption({
     required this.icon,
     required this.label,
-    required this.iconColor,
-    required this.bgColor,
     required this.onTap,
   });
 
@@ -186,39 +182,26 @@ class _TypeOption extends StatelessWidget {
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
+        behavior: HitTestBehavior.opaque,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 22),
           decoration: BoxDecoration(
-            color: bgColor,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.divider, width: 1.5),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: iconColor.withValues(alpha: 0.15),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Icon(icon, color: iconColor, size: 26),
-              ),
-              const SizedBox(height: 12),
+              Icon(icon, color: AppColors.textPrimary, size: 32),
+              const SizedBox(height: 10),
               Text(
                 label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'Pretendard',
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: iconColor,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],

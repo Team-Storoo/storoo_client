@@ -118,31 +118,23 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEEEEEE),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-          child: Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 24, 20, 0),
-                  child: Text('검색', style: AppTextStyles.headline1),
-                ),
-                SearchBarField(controller: _ctrl, onChanged: _onSearch),
-                if (_query.isNotEmpty && _hasResults)
-                  _SearchResultCount(count: _totalCount),
-                Expanded(child: _buildBody()),
-              ],
-            ),
-          ),
-        ),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false,
+        title: const Text('검색', style: AppTextStyles.headline1),
+        centerTitle: false,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SearchBarField(controller: _ctrl, onChanged: _onSearch),
+          if (_query.isNotEmpty && _hasResults)
+            _SearchResultCount(count: _totalCount),
+          Expanded(child: _buildBody()),
+        ],
       ),
     );
   }
@@ -152,7 +144,7 @@ class _SearchScreenState extends State<SearchScreen> {
     if (!_hasResults) return SearchEmptyView.noResults(query: _query);
 
     return ListView(
-      padding: const EdgeInsets.only(bottom: 100),
+      padding: const EdgeInsets.only(bottom: 120),
       children: [
         if (_folderResults.isNotEmpty) ...[
           SearchSectionLabel(label: '폴더', count: _folderResults.length),
