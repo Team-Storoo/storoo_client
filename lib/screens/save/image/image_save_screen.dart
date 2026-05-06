@@ -83,7 +83,7 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
     if (mounted) {
       setState(() {
         _folders = folders;
-        if (_isEditing && widget.initialFolder != null) {
+        if (widget.initialFolder != null) {
           _selectedFolder = _folders.firstWhere(
             (f) => f.id == widget.initialFolder!.id,
             orElse: () => folders.isNotEmpty ? folders.first : _folders.first,

@@ -4,7 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import './folder_card.dart';
 
-/// 폴더 그리드 (일반 / 드래그 재정렬)
+/// 폴더 그리드 (일반 / 드래그 재정렬 / 리스트)
 class FolderGrid extends StatelessWidget {
   const FolderGrid({
     super.key,
@@ -14,6 +14,7 @@ class FolderGrid extends StatelessWidget {
     this.onDeleteTap,
     this.onRenameTap,
     this.isReorderable = false,
+    this.isListView = false,
     this.onReorder,
   });
 
@@ -23,6 +24,7 @@ class FolderGrid extends StatelessWidget {
   final ValueChanged<FolderItem>? onDeleteTap;
   final ValueChanged<FolderItem>? onRenameTap;
   final bool isReorderable;
+  final bool isListView;
   final void Function(int oldIndex, int newIndex)? onReorder;
 
   // ── 화면 빌드 ─────────────────────────────────────────────────────
@@ -31,6 +33,16 @@ class FolderGrid extends StatelessWidget {
     // 폴더 없음 → 빈 상태
     if (folders.isEmpty) {
       return _EmptyState(onAddTap: onAddTap);
+    }
+    // 리스트 뷰 모드
+    if (isListView) {
+      return _FolderListView(
+        folders: folders,
+        onAddTap: onAddTap,
+        onFolderTap: onFolderTap,
+        onDeleteTap: onDeleteTap,
+        onRenameTap: onRenameTap,
+      );
     }
     // 사용자 지정순 → 드래그 재정렬 그리드
     if (isReorderable) {
@@ -66,6 +78,127 @@ class FolderGrid extends StatelessWidget {
         // 마지막 셀 → 폴더 추가 카드
         return _AddCard(onTap: onAddTap);
       },
+    );
+  }
+}
+
+// ── 리스트 뷰 ────────────────────────────────────────────────────────
+
+class _FolderListView extends StatelessWidget {
+  const _FolderListView({
+    required this.folders,
+    required this.onAddTap,
+    required this.onFolderTap,
+    this.onDeleteTap,
+    this.onRenameTap,
+  });
+
+  final List<FolderItem> folders;
+  final VoidCallback onAddTap;
+  final ValueChanged<FolderItem> onFolderTap;
+  final ValueChanged<FolderItem>? onDeleteTap;
+  final ValueChanged<FolderItem>? onRenameTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+      itemCount: folders.length + 1,
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (_, i) {
+        if (i < folders.length) {
+          final folder = folders[i];
+          return _FolderListRow(
+            folder: folder,
+            onTap: () => onFolderTap(folder),
+            onDeleteTap: onDeleteTap,
+            onRenameTap: onRenameTap,
+          );
+        }
+        return _AddListRow(onTap: onAddTap);
+      },
+    );
+  }
+}
+
+class _FolderListRow extends StatelessWidget {
+  const _FolderListRow({
+    required this.folder,
+    required this.onTap,
+    this.onDeleteTap,
+    this.onRenameTap,
+  });
+
+  final FolderItem folder;
+  final VoidCallback onTap;
+  final ValueChanged<FolderItem>? onDeleteTap;
+  final ValueChanged<FolderItem>? onRenameTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.primaryLight,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(folder.name, style: AppTextStyles.subtitle),
+                  const SizedBox(height: 4),
+                  Text(
+                    '저장된 항목 ${folder.itemCount}개',
+                    style: AppTextStyles.caption,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AddListRow extends StatelessWidget {
+  const _AddListRow({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.primary),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.create_new_folder,
+              color: AppColors.primary,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '폴더 추가하기',
+              style: AppTextStyles.body.copyWith(color: AppColors.primary),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
