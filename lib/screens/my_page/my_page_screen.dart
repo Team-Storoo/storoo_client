@@ -17,10 +17,6 @@ import './settings/theme_screen.dart';
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
 
-  void _push(BuildContext context, Widget screen) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
-  }
-
   @override
   State<MyPageScreen> createState() => _MyPageScreenState();
 }
@@ -32,6 +28,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
   void initState() {
     super.initState();
     _loadNickname();
+  }
+
+  void _push(Widget screen) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
   }
 
   Future<void> _loadNickname() async {
@@ -62,9 +62,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
               title: '고객 지원',
               items: const ['공지사항', '서비스 문의', '버그 제보하기'],
               onTaps: [
-                () => _push(context, const NoticeScreen()),
-                () => _push(context, const InquiryScreen()),
-                () => _push(context, const BugReportScreen()),
+                () => _push(const NoticeScreen()),
+                () => _push(const InquiryScreen()),
+                () => _push(const BugReportScreen()),
               ],
             ),
 
@@ -78,10 +78,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 '데이터 제공 정책',
               ],
               onTaps: [
-                () => _push(context, const TermsScreen()),
-                () => _push(context, const PrivacyScreen()),
-                () => _push(context, const MarketingScreen()),
-                () => _push(context, const DataPolicyScreen()),
+                () => _push(const TermsScreen()),
+                () => _push(const PrivacyScreen()),
+                () => _push(const MarketingScreen()),
+                () => _push(const DataPolicyScreen()),
               ],
             ),
 
@@ -90,8 +90,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
               title: '설정',
               items: const ['알림 설정', '테마 설정', '로그아웃'],
               onTaps: [
-                () => _push(context, const NotificationScreen()),
-                () => _push(context, const ThemeScreen()),
+                () => _push(const NotificationScreen()),
+                () => _push(const ThemeScreen()),
                 () {}, // TODO: 로그아웃
               ],
             ),
