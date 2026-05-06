@@ -38,14 +38,12 @@ class InFolderImageGrid extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 8,
         mainAxisSpacing: 8,
-        childAspectRatio: 0.85,
+        childAspectRatio: 1.0,
       ),
       itemCount: items.length,
-      itemBuilder: (_, i) => _ImageCard(
-        item: items[i],
-        onDelete: onDelete,
-        onTap: onTap,
-      ),
+      itemBuilder:
+          (_, i) =>
+              _ImageCard(item: items[i], onDelete: onDelete, onTap: onTap),
     );
   }
 }
@@ -60,24 +58,31 @@ class _ImageCard extends StatelessWidget {
   void _showDeleteMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.delete_outline, color: AppColors.error),
-              title: const Text(
-                '삭제',
-                style: TextStyle(fontFamily: 'Pretendard', color: AppColors.error),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                onDelete(item.id);
-              },
+      builder:
+          (_) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.error,
+                  ),
+                  title: const Text(
+                    '삭제',
+                    style: TextStyle(
+                      fontFamily: 'Pretendard',
+                      color: AppColors.error,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    onDelete(item.id);
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -92,41 +97,31 @@ class _ImageCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.divider),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: item.imageUrl != null && item.imageUrl!.isNotEmpty
-                    ? Image.file(
-                        File(item.imageUrl!),
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        errorBuilder: (_, __, ___) => const Center(
-                          child: Icon(Icons.broken_image_outlined, color: AppColors.textSecondary, size: 32),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child:
+              item.imageUrl != null && item.imageUrl!.isNotEmpty
+                  ? Image.file(
+                    File(item.imageUrl!),
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    errorBuilder:
+                        (_, __, ___) => const Center(
+                          child: Icon(
+                            Icons.broken_image_outlined,
+                            color: AppColors.textSecondary,
+                            size: 32,
+                          ),
                         ),
-                      )
-                    : const Center(
-                        child: Icon(Icons.image_outlined, color: AppColors.textSecondary, size: 32),
-                      ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-              child: Text(
-                item.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontFamily: 'Pretendard',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-          ],
+                  )
+                  : const Center(
+                    child: Icon(
+                      Icons.image_outlined,
+                      color: AppColors.textSecondary,
+                      size: 32,
+                    ),
+                  ),
         ),
       ),
     );
