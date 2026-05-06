@@ -50,14 +50,10 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
 
   bool get _isEditing => widget.initialContent != null;
 
-  bool get _canSave {
-    if (_isEditing) {
-      return _titleCtrl.text.trim().isNotEmpty && _selectedFolder != null;
-    }
-    return _images.isNotEmpty &&
-        _titleCtrl.text.trim().isNotEmpty &&
-        _selectedFolder != null;
-  }
+  bool get _canSave =>
+      _images.isNotEmpty &&
+      _titleCtrl.text.trim().isNotEmpty &&
+      _selectedFolder != null;
 
   @override
   void initState() {
@@ -67,6 +63,9 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
       _titleCtrl.text = c.title;
       _memoCtrl.text = c.content ?? '';
       _tags.addAll(c.tags);
+      if (c.imageUrl?.isNotEmpty == true) {
+        _images.add(XFile(c.imageUrl!));
+      }
     }
     _loadFolders();
     _titleCtrl.addListener(() => setState(() {}));
@@ -243,18 +242,12 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    if (_isEditing &&
-                        widget.initialContent!.imageUrl?.isNotEmpty == true)
-                      _LockedImagePreview(
-                        imageUrl: widget.initialContent!.imageUrl!,
-                      )
-                    else
-                      _ImagePickerRow(
-                        images: _images,
-                        maxImages: _maxImages,
-                        onAdd: _addImage,
-                        onRemove: _removeImage,
-                      ),
+                    _ImagePickerRow(
+                      images: _images,
+                      maxImages: _maxImages,
+                      onAdd: _addImage,
+                      onRemove: _removeImage,
+                    ),
                     const SizedBox(height: 20),
 
                     // ── 제목 ──
