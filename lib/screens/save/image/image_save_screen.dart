@@ -553,32 +553,3 @@ class _InputField extends StatelessWidget {
     );
   }
 }
-
-/// 수정 모드 전용 — 기존 이미지 잠금 미리보기
-class _LockedImagePreview extends StatelessWidget {
-  final String imageUrl;
-  static const double _size = 88.0;
-
-  const _LockedImagePreview({required this.imageUrl});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child:
-          imageUrl.startsWith('http')
-              ? Image.network(
-                imageUrl,
-                width: _size,
-                height: _size,
-                fit: BoxFit.cover,
-              )
-              : Image.file(
-                File(imageUrl),
-                width: _size,
-                height: _size,
-                fit: BoxFit.cover,
-              ),
-    );
-  }
-}

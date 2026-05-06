@@ -33,40 +33,32 @@ class DetailLinkPreviewCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (item.description?.isNotEmpty == true) ...[
+                // OG 제목 (1줄, bold, 말줄임)
+                if (item.description?.isNotEmpty == true)
                   Text(
                     item.description!,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'Pretendard',
-                      fontSize: 13,
-                      color: AppColors.textPrimary,
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    url,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontFamily: 'Pretendard',
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                ] else
-                  Text(
-                    url,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'Pretendard',
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
+                if (item.description?.isNotEmpty == true)
+                  const SizedBox(height: 4),
+                // URL
+                Text(
+                  url,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'Pretendard',
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
                   ),
+                ),
                 const SizedBox(height: 10),
                 Align(
                   alignment: Alignment.centerRight,

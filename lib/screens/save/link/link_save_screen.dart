@@ -4,6 +4,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../models/content.dart';
 import '../../../models/folder_item.dart';
 import '../../../services/db_service.dart';
+import '../../../services/og_meta_service.dart';
 import '../../folder/widgets/create_folder_dialog.dart';
 import '../widgets/folder_selector.dart';
 import '../widgets/memo_field.dart';
@@ -144,12 +145,17 @@ class _SaveLinkScreenState extends State<SaveLinkScreen> {
         await DBService.updateContent(c);
       }
     } else {
+      final url = _linkCtrl.text.trim();
+      // OG 메타 자동 수집 (실패해도 저장 진행)
+      final meta = await OgMetaService.fetch(url);
       final content =
           Content()
             ..type = 'link'
             ..folderId = _selectedFolder!.id
             ..title = _titleCtrl.text.trim()
-            ..url = _linkCtrl.text.trim()
+            ..url = url
+            ..description = meta.title
+            ..imageUrl = meta.imageUrl
             ..content = memo.isEmpty ? null : memo
             ..tags = List.from(_tags)
             ..createdAt = DateTime.now();
