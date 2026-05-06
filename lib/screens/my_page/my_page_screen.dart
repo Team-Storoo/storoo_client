@@ -12,6 +12,7 @@ import './policy/marketing_screen.dart';
 import './policy/data_policy_screen.dart';
 import './settings/notification_screen.dart';
 import './settings/theme_screen.dart';
+import './settings/home_setting_screen.dart';
 
 /// 마이페이지 화면
 class MyPageScreen extends StatefulWidget {
@@ -88,10 +89,11 @@ class _MyPageScreenState extends State<MyPageScreen> {
             // ── 설정 ──
             MyPageMenuSection(
               title: '설정',
-              items: const ['알림 설정', '테마 설정', '로그아웃'],
+              items: const ['알림 설정', '테마 설정', '홈화면 설정', '로그아웃'],
               onTaps: [
                 () => _push(const NotificationScreen()),
                 () => _push(const ThemeScreen()),
+                () => _push(const HomeSettingScreen()),
                 () {}, // TODO: 로그아웃
               ],
             ),
