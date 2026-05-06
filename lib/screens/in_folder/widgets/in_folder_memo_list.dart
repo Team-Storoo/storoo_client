@@ -99,6 +99,7 @@ class _MemoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () => onTap?.call(item),
       onLongPress: () => _showDeleteMenu(context),
       child: Padding(

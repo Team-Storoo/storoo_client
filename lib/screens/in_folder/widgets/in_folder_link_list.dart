@@ -161,6 +161,7 @@ class _LinkCard extends StatelessWidget {
     final dateSource = source.isNotEmpty ? '$dateStr | $source' : dateStr;
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () => onTap?.call(item),
       onLongPress: () => _showDeleteMenu(context),
       child: Padding(

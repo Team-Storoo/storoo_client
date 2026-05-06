@@ -1,77 +1,87 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
-/// 검색 화면 전용 검색 바
-/// 입력 중일 때 우측에 X 버튼이 나타나 한 번에 초기화합니다.
-class SearchBarField extends StatelessWidget {
+/// 검색 입력 필드 — 텍스트 입력 + clear 버튼
+class SearchBarField extends StatefulWidget {
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+
   const SearchBarField({
     super.key,
     required this.controller,
     required this.onChanged,
   });
 
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
+  @override
+  State<SearchBarField> createState() => _SearchBarFieldState();
+}
+
+class _SearchBarFieldState extends State<SearchBarField> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_rebuild);
+  }
+
+  void _rebuild() => setState(() {});
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_rebuild);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.primaryLight,
-          borderRadius: BorderRadius.circular(12),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+      child: TextField(
+        controller: widget.controller,
+        onChanged: widget.onChanged,
+        style: const TextStyle(
+          fontFamily: 'Pretendard',
+          fontSize: 14,
+          color: AppColors.textPrimary,
         ),
-        child: TextField(
-          controller: controller,
-          onChanged: onChanged,
-          style: const TextStyle(
+        decoration: InputDecoration(
+          hintText: '검색어를 입력하세요',
+          hintStyle: const TextStyle(
             fontFamily: 'Pretendard',
             fontSize: 14,
-            color: AppColors.textPrimary,
+            color: AppColors.textSecondary,
           ),
-          decoration: InputDecoration(
-            hintText: '폴더명 또는 저장된 내용 검색',
-            hintStyle: const TextStyle(
-              fontFamily: 'Pretendard',
-              fontSize: 14,
-              color: AppColors.navUnselected,
-            ),
-            prefixIcon: const Icon(
-              Icons.search,
-              color: AppColors.navUnselected,
-              size: 20,
-            ),
-            border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
-            suffixIcon: ValueListenableBuilder<TextEditingValue>(
-              valueListenable: controller,
-              builder: (_, value, __) {
-                if (value.text.isEmpty) return const SizedBox.shrink();
-                return GestureDetector(
-                  onTap: () {
-                    controller.clear();
-                    onChanged('');
-                  },
-                  child: const Padding(
-                    padding: EdgeInsets.only(right: 12),
-                    child: Icon(
+          filled: true,
+          fillColor: const Color(0xFFF5F5F5),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide.none,
+          ),
+          suffixIcon:
+              widget.controller.text.isNotEmpty
+                  ? IconButton(
+                    icon: const Icon(
                       Icons.cancel,
-                      color: AppColors.navUnselected,
-                      size: 20,
+                      color: AppColors.textSecondary,
+                      size: 18,
                     ),
-                  ),
-                );
-              },
-            ),
-            suffixIconConstraints: const BoxConstraints(
-              minWidth: 40,
-              minHeight: 0,
-            ),
-          ),
+                    onPressed: () {
+                      widget.controller.clear();
+                      widget.onChanged('');
+                    },
+                  )
+                  : null,
         ),
       ),
     );
