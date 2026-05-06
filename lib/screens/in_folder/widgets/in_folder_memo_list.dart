@@ -31,46 +31,64 @@ class InFolderMemoList extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
       itemCount: items.length,
-      itemBuilder: (_, i) => _MemoCard(
-        item: items[i],
-        onDelete: onDelete,
-        onTap: onTap,
-      ),
+      separatorBuilder:
+          (_, __) =>
+              const Divider(height: 1, thickness: 1, color: AppColors.divider),
+      itemBuilder:
+          (_, i) => _MemoCard(
+            item: items[i],
+            folderName: folderName,
+            onDelete: onDelete,
+            onTap: onTap,
+          ),
     );
   }
 }
 
 class _MemoCard extends StatelessWidget {
   final Content item;
+  final String folderName;
   final Future<void> Function(int id) onDelete;
   final void Function(Content item)? onTap;
 
-  const _MemoCard({required this.item, required this.onDelete, this.onTap});
+  const _MemoCard({
+    required this.item,
+    required this.folderName,
+    required this.onDelete,
+    this.onTap,
+  });
 
   void _showDeleteMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.delete_outline, color: AppColors.error),
-              title: const Text(
-                '삭제',
-                style: TextStyle(fontFamily: 'Pretendard', color: AppColors.error),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                onDelete(item.id);
-              },
+      builder:
+          (_) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.error,
+                  ),
+                  title: const Text(
+                    '삭제',
+                    style: TextStyle(
+                      fontFamily: 'Pretendard',
+                      color: AppColors.error,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    onDelete(item.id);
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -81,71 +99,92 @@ class _MemoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () => onTap?.call(item),
       onLongPress: () => _showDeleteMenu(context),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.divider),
-        ),
-        child: Row(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFF3E0),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.sticky_note_2_outlined, color: Color(0xFFFF9800), size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'Pretendard',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  if (item.content != null && item.content!.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      item.content!,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontFamily: 'Pretendard',
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 6),
-                  Text(
-                    _formatDate(item.createdAt),
-                    style: const TextStyle(
-                      fontFamily: 'Pretendard',
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
+            Text(
+              item.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
               ),
             ),
+            if (item.content != null && item.content!.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                item.content!,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'Pretendard',
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  height: 1.4,
+                ),
+              ),
+            ],
+            const SizedBox(height: 4),
+            Text(
+              _formatDate(item.createdAt),
+              style: const TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '폴더 > $folderName',
+              style: const TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            if (item.tags.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children:
+                    item.tags.take(5).map((tag) => _TagChip(tag: tag)).toList(),
+              ),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TagChip extends StatelessWidget {
+  final String tag;
+
+  const _TagChip({required this.tag});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF2F2F2),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        tag,
+        style: const TextStyle(
+          fontFamily: 'Pretendard',
+          fontSize: 11,
+          color: AppColors.textSecondary,
         ),
       ),
     );

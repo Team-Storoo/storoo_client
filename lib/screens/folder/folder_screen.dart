@@ -24,6 +24,7 @@ class FolderScreenState extends State<FolderScreen> {
   List<FolderItem> _folders = [];
   List<FolderItem> _customOrderedFolders = [];
   FolderSortFilter _filter = FolderSortFilter.total;
+  bool _isGridView = true;
 
   // ── 초기화 ──────────────────────────────────────────────────────────
   @override
@@ -50,10 +51,14 @@ class FolderScreenState extends State<FolderScreen> {
   }
 
   // ── 사용자 지정 순서 ────────────────────────────────────────────────
-  List<FolderItem> _buildCustomOrder(List<FolderItem> folders, List<int> orderedIds) {
+  List<FolderItem> _buildCustomOrder(
+    List<FolderItem> folders,
+    List<int> orderedIds,
+  ) {
     if (orderedIds.isEmpty) return List.from(folders);
     final map = {for (final f in folders) f.id: f};
-    final ordered = orderedIds.where(map.containsKey).map((id) => map[id]!).toList();
+    final ordered =
+        orderedIds.where(map.containsKey).map((id) => map[id]!).toList();
     final remaining = folders.where((f) => !orderedIds.contains(f.id)).toList();
     return [...ordered, ...remaining];
   }
@@ -79,15 +84,16 @@ class FolderScreenState extends State<FolderScreen> {
     if (name == null || name.isEmpty) return;
 
     if (_folders.length >= 5) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('폴더는 최대 5개까지만 만들 수 있어요')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('폴더는 최대 5개까지만 만들 수 있어요')));
       return;
     }
 
-    final folder = FolderItem()
-      ..name = name
-      ..createdAt = DateTime.now();
+    final folder =
+        FolderItem()
+          ..name = name
+          ..createdAt = DateTime.now();
 
     await DBService.saveFolder(folder);
     await _loadFolders();
@@ -96,7 +102,8 @@ class FolderScreenState extends State<FolderScreen> {
   Future<void> _renameFolder(FolderItem folder) async {
     final name = await showDialog<String>(
       context: context,
-      builder: (_) => CreateFolderDialog(initialName: folder.name, isRename: true),
+      builder:
+          (_) => CreateFolderDialog(initialName: folder.name, isRename: true),
     );
     if (!mounted) return;
     if (name == null || name.isEmpty || name == folder.name) return;
@@ -114,9 +121,11 @@ class FolderScreenState extends State<FolderScreen> {
   List<FolderItem> get _sorted {
     switch (_filter) {
       case FolderSortFilter.name:
-        return List<FolderItem>.from(_folders)..sort((a, b) => a.name.compareTo(b.name));
+        return List<FolderItem>.from(_folders)
+          ..sort((a, b) => a.name.compareTo(b.name));
       case FolderSortFilter.recent:
-        return List<FolderItem>.from(_folders)..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        return List<FolderItem>.from(_folders)
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       case FolderSortFilter.custom:
         return _customOrderedFolders;
       case FolderSortFilter.total:
@@ -147,21 +156,34 @@ class FolderScreenState extends State<FolderScreen> {
             ),
           ),
           actions: [
-            // 폴더 추가 버튼
+            // 그리드/리스트 전환 버튼
             GestureDetector(
-              onTap: _showCreateDialog,
+              onTap: () => setState(() => _isGridView = !_isGridView),
               behavior: HitTestBehavior.opaque,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                child: Icon(Icons.add, color: AppColors.textPrimary),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 12,
+                ),
+                child: Icon(
+                  _isGridView
+                      ? Icons.view_list_rounded
+                      : Icons.grid_view_rounded,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
-            // 더보기 버튼 (미구현)
+            // 더보기 버튼
             GestureDetector(
               onTap: () {},
               behavior: HitTestBehavior.opaque,
               child: const Padding(
-                padding: EdgeInsets.only(left: 4, right: 16, top: 12, bottom: 12),
+                padding: EdgeInsets.only(
+                  left: 4,
+                  right: 16,
+                  top: 12,
+                  bottom: 12,
+                ),
                 child: Icon(Icons.more_vert, color: AppColors.textPrimary),
               ),
             ),
@@ -181,13 +203,15 @@ class FolderScreenState extends State<FolderScreen> {
                 folders: _sorted,
                 onAddTap: _showCreateDialog,
                 onRenameTap: _renameFolder,
+                isListView: !_isGridView,
                 onFolderTap: (folder) async {
                   await Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => InFolderScreen(
-                        folder: folder,
-                        onContentSaved: widget.onContentSaved,
-                      ),
+                      builder:
+                          (_) => InFolderScreen(
+                            folder: folder,
+                            onContentSaved: widget.onContentSaved,
+                          ),
                     ),
                   );
                   _loadFolders();

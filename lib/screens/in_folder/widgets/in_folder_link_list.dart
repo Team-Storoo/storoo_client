@@ -32,15 +32,19 @@ class InFolderLinkList extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
       itemCount: items.length,
-      itemBuilder: (_, i) => _LinkCard(
-        item: items[i],
-        folderName: folderName,
-        onDelete: onDelete,
-        onTap: onTap,
-      ),
+      separatorBuilder:
+          (_, __) =>
+              const Divider(height: 1, thickness: 1, color: AppColors.divider),
+      itemBuilder:
+          (_, i) => _LinkCard(
+            item: items[i],
+            folderName: folderName,
+            onDelete: onDelete,
+            onTap: onTap,
+          ),
     );
   }
 }
@@ -61,24 +65,31 @@ class _LinkCard extends StatelessWidget {
   void _showDeleteMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.delete_outline, color: AppColors.error),
-              title: const Text(
-                '삭제',
-                style: TextStyle(fontFamily: 'Pretendard', color: AppColors.error),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                onDelete(item.id);
-              },
+      builder:
+          (_) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.error,
+                  ),
+                  title: const Text(
+                    '삭제',
+                    style: TextStyle(
+                      fontFamily: 'Pretendard',
+                      color: AppColors.error,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    onDelete(item.id);
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -90,9 +101,11 @@ class _LinkCard extends StatelessWidget {
     if (url == null || url.isEmpty) return '';
     try {
       final host = Uri.parse(url).host.toLowerCase();
-      if (host.contains('youtube.com') || host.contains('youtu.be')) return 'Youtube';
+      if (host.contains('youtube.com') || host.contains('youtu.be'))
+        return 'Youtube';
       if (host.contains('instagram.com')) return 'Instagram';
-      if (host.contains('twitter.com') || host.contains('x.com')) return 'Twitter';
+      if (host.contains('twitter.com') || host.contains('x.com'))
+        return 'Twitter';
       if (host.contains('naver.com')) return 'Naver';
       if (host.contains('google.com')) return 'Google';
       if (host.contains('tiktok.com')) return 'TikTok';
@@ -108,15 +121,23 @@ class _LinkCard extends StatelessWidget {
   Widget _buildThumbnail() {
     final imageUrl = item.imageUrl;
     if (imageUrl != null && imageUrl.isNotEmpty) {
-      final image = imageUrl.startsWith('http')
-          ? Image.network(imageUrl, width: 68, height: 68, fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _placeholder())
-          : Image.file(File(imageUrl), width: 68, height: 68, fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _placeholder());
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: image,
-      );
+      final image =
+          imageUrl.startsWith('http')
+              ? Image.network(
+                imageUrl,
+                width: 68,
+                height: 68,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _placeholder(),
+              )
+              : Image.file(
+                File(imageUrl),
+                width: 68,
+                height: 68,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _placeholder(),
+              );
+      return ClipRRect(borderRadius: BorderRadius.circular(8), child: image);
     }
     return _placeholder();
   }
@@ -140,16 +161,11 @@ class _LinkCard extends StatelessWidget {
     final dateSource = source.isNotEmpty ? '$dateStr | $source' : dateStr;
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () => onTap?.call(item),
       onLongPress: () => _showDeleteMenu(context),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.divider),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -191,10 +207,11 @@ class _LinkCard extends StatelessWidget {
                     Wrap(
                       spacing: 4,
                       runSpacing: 4,
-                      children: item.tags
-                          .take(5)
-                          .map((tag) => _TagChip(tag: tag))
-                          .toList(),
+                      children:
+                          item.tags
+                              .take(5)
+                              .map((tag) => _TagChip(tag: tag))
+                              .toList(),
                     ),
                   ],
                 ],

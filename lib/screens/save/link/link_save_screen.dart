@@ -4,19 +4,27 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../models/content.dart';
 import '../../../models/folder_item.dart';
 import '../../../services/db_service.dart';
+import '../../../services/og_meta_service.dart';
 import '../../folder/widgets/create_folder_dialog.dart';
 import '../widgets/folder_selector.dart';
 import '../widgets/memo_field.dart';
 import '../widgets/tag_input_row.dart';
 import '../widgets/save_button.dart';
 
-/// 링크 저장 화면
+/// 링크 저장 / 수정 화면
 /// 필수: 링크 URL, 제목, 저장 폴더
 /// 선택: 메모(최대 200자), 태그
 class SaveLinkScreen extends StatefulWidget {
   final VoidCallback? onSaved;
+  final Content? initialContent;
+  final FolderItem? initialFolder;
 
-  const SaveLinkScreen({super.key, this.onSaved});
+  const SaveLinkScreen({
+    super.key,
+    this.onSaved,
+    this.initialContent,
+    this.initialFolder,
+  });
 
   @override
   State<SaveLinkScreen> createState() => _SaveLinkScreenState();
@@ -35,6 +43,8 @@ class _SaveLinkScreenState extends State<SaveLinkScreen> {
 
   static const int _maxFolders = 5;
 
+  bool get _isEditing => widget.initialContent != null;
+
   bool get _canSave =>
       _linkCtrl.text.trim().isNotEmpty &&
       _titleCtrl.text.trim().isNotEmpty &&
@@ -43,6 +53,13 @@ class _SaveLinkScreenState extends State<SaveLinkScreen> {
   @override
   void initState() {
     super.initState();
+    if (_isEditing) {
+      final c = widget.initialContent!;
+      _linkCtrl.text = c.url ?? '';
+      _titleCtrl.text = c.title;
+      _memoCtrl.text = c.content ?? '';
+      _tags.addAll(c.tags);
+    }
     _loadFolders();
     _linkCtrl.addListener(() => setState(() {}));
     _titleCtrl.addListener(() => setState(() {}));
@@ -61,7 +78,14 @@ class _SaveLinkScreenState extends State<SaveLinkScreen> {
     if (mounted) {
       setState(() {
         _folders = folders;
-        _selectedFolder ??= folders.isNotEmpty ? folders.first : null;
+        if (widget.initialFolder != null) {
+          _selectedFolder = _folders.firstWhere(
+            (f) => f.id == widget.initialFolder!.id,
+            orElse: () => folders.isNotEmpty ? folders.first : _folders.first,
+          );
+        } else {
+          _selectedFolder ??= folders.isNotEmpty ? folders.first : null;
+        }
         _loadingFolders = false;
       });
     }
@@ -106,16 +130,38 @@ class _SaveLinkScreenState extends State<SaveLinkScreen> {
     if (_saving) return;
     setState(() => _saving = true);
     final memo = _memoCtrl.text.trim();
-    final content =
-        Content()
-          ..type = 'link'
-          ..folderId = _selectedFolder!.id
-          ..title = _titleCtrl.text.trim()
-          ..url = _linkCtrl.text.trim()
-          ..content = memo.isEmpty ? null : memo
-          ..tags = List.from(_tags)
-          ..createdAt = DateTime.now();
-    await DBService.saveContentToFolder(content);
+
+    if (_isEditing) {
+      final c = widget.initialContent!;
+      final oldFolderId = c.folderId;
+      c.title = _titleCtrl.text.trim();
+      c.url = _linkCtrl.text.trim();
+      c.content = memo.isEmpty ? null : memo;
+      c.tags = List.from(_tags);
+      c.folderId = _selectedFolder!.id;
+      if (oldFolderId != null && oldFolderId != c.folderId) {
+        await DBService.moveContentToFolder(c, oldFolderId);
+      } else {
+        await DBService.updateContent(c);
+      }
+    } else {
+      final url = _linkCtrl.text.trim();
+      // OG 메타 자동 수집 (실패해도 저장 진행)
+      final meta = await OgMetaService.fetch(url);
+      final content =
+          Content()
+            ..type = 'link'
+            ..folderId = _selectedFolder!.id
+            ..title = _titleCtrl.text.trim()
+            ..url = url
+            ..description = meta.title
+            ..imageUrl = meta.imageUrl
+            ..content = memo.isEmpty ? null : memo
+            ..tags = List.from(_tags)
+            ..createdAt = DateTime.now();
+      await DBService.saveContentToFolder(content);
+    }
+
     if (mounted) {
       setState(() => _saving = false);
       widget.onSaved?.call();
@@ -147,7 +193,7 @@ class _SaveLinkScreenState extends State<SaveLinkScreen> {
           elevation: 0,
           scrolledUnderElevation: 0,
           centerTitle: true,
-          title: Text('저장', style: AppTextStyles.headline2),
+          title: Text(_isEditing ? '수정' : '저장', style: AppTextStyles.headline2),
           leading: GestureDetector(
             onTap: () => Navigator.pop(context),
             behavior: HitTestBehavior.opaque,

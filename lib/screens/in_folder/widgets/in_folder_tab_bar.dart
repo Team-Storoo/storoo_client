@@ -15,7 +15,7 @@ class InFolderTabBar extends StatelessWidget {
     required this.onTabChanged,
   });
 
-  static const _labels = ['링크', '이미지', '메모'];
+  static const _labels = ['링크', '이미지', '노트'];
 
   @override
   Widget build(BuildContext context) {
