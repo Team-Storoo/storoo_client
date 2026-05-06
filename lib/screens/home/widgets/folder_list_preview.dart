@@ -5,9 +5,10 @@ import '../../../models/folder_item.dart';
 
 /// 홈 화면 내 폴더 미리보기 목록 (세로 리스트)
 class FolderListPreview extends StatelessWidget {
-  const FolderListPreview({super.key, required this.folders});
+  const FolderListPreview({super.key, required this.folders, this.onTap});
 
   final List<FolderItem> folders;
+  final void Function(FolderItem folder)? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -26,26 +27,33 @@ class FolderListPreview extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (_, index) {
         final folder = folders[index];
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: AppColors.primaryLight,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(folder.name, style: AppTextStyles.subtitle),
-                    const SizedBox(height: 4),
-                    Text('저장된 항목 ${folder.itemCount}개', style: AppTextStyles.caption),
-                  ],
+        return GestureDetector(
+          onTap: onTap != null ? () => onTap!(folder) : null,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.primaryLight,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(folder.name, style: AppTextStyles.subtitle),
+                      const SizedBox(height: 4),
+                      Text(
+                        '저장된 항목 ${folder.itemCount}개',
+                        style: AppTextStyles.caption,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-            ],
+                const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+              ],
+            ),
           ),
         );
       },

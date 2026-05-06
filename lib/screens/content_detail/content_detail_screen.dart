@@ -212,7 +212,6 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
                 DetailReadField(
                   text: _item.content ?? '',
                   placeholder: '저장된 메모가 없습니다.',
-                  maxLines: 5,
                 ),
                 const SizedBox(height: 22),
               ],

@@ -5,13 +5,11 @@ import '../../../core/theme/app_colors.dart';
 class DetailReadField extends StatelessWidget {
   final String text;
   final String? placeholder;
-  final int maxLines;
 
   const DetailReadField({
     super.key,
     required this.text,
     this.placeholder,
-    this.maxLines = 1,
   });
 
   @override
@@ -29,8 +27,6 @@ class DetailReadField extends StatelessWidget {
       ),
       child: Text(
         display,
-        maxLines: maxLines,
-        overflow: maxLines == 1 ? TextOverflow.ellipsis : TextOverflow.visible,
         style: TextStyle(
           fontFamily: 'Pretendard',
           fontSize: 14,

@@ -1,21 +1,30 @@
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/content.dart';
+import '../../../models/folder_item.dart';
 
 class RecentSavedList extends StatelessWidget {
   final List<Content> items;
+  final Map<int, FolderItem> folderMap;
+  final void Function(Content content, FolderItem? folder)? onTap;
 
-  const RecentSavedList({super.key, required this.items});
+  const RecentSavedList({
+    super.key,
+    required this.items,
+    this.folderMap = const {},
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
-      return SizedBox(
-        height: 140,
+      return const SizedBox(
+        height: 120,
         child: Center(
           child: Text(
             '아직 저장된 항목이 없어요',
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Pretendard',
               fontSize: 13,
               color: AppColors.textSecondary,
@@ -26,130 +35,173 @@ class RecentSavedList extends StatelessWidget {
     }
 
     return SizedBox(
-      height: 140,
+      height: 220,
       child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
         scrollDirection: Axis.horizontal,
         itemCount: items.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (_, index) => _RecentItemCard(item: items[index]),
+        itemBuilder: (_, i) {
+          final item = items[i];
+          final folder =
+              item.folderId != null ? folderMap[item.folderId] : null;
+          return _RecentItemCard(
+            item: item,
+            folder: folder,
+            onTap: onTap != null ? () => onTap!(item, folder) : null,
+          );
+        },
       ),
     );
   }
 }
 
+// ── 카드 ──────────────────────────────────────────────────────────────
+
 class _RecentItemCard extends StatelessWidget {
   final Content item;
+  final FolderItem? folder;
+  final VoidCallback? onTap;
 
-  const _RecentItemCard({required this.item});
+  const _RecentItemCard({required this.item, this.folder, this.onTap});
+
+  String _formatDate(DateTime dt) =>
+      '${dt.year}.${dt.month.toString().padLeft(2, '0')}.${dt.day.toString().padLeft(2, '0')}';
+
+  String get _typeLabel => switch (item.type) {
+    'image' => '이미지',
+    'memo' => '노트',
+    _ => '링크',
+  };
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 150,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildTopArea(),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'Pretendard',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                      height: 1.3,
-                    ),
-                  ),
-                  const Spacer(),
-                  _TypeBadge(type: item.type),
-                ],
-              ),
-            ),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 160,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.divider),
           ),
-        ],
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(flex: 55, child: _buildImage()),
+              Expanded(
+                flex: 45,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: 'Pretendard',
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        '폴더 > ${folder?.name ?? '-'} > $_typeLabel',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: 'Pretendard',
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        _formatDate(item.createdAt),
+                        style: const TextStyle(
+                          fontFamily: 'Pretendard',
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildTopArea() {
-    if (item.type == 'image' && item.imageUrl != null && item.imageUrl!.isNotEmpty) {
-      return SizedBox(
-        height: 72,
+  Widget _buildImage() {
+    if (item.type == 'image' &&
+        item.imageUrl != null &&
+        item.imageUrl!.isNotEmpty) {
+      return Image.file(
+        File(item.imageUrl!),
+        fit: BoxFit.cover,
         width: double.infinity,
-        child: Image.network(
-          item.imageUrl!,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _iconBox(Icons.broken_image_outlined, AppColors.divider, AppColors.textSecondary),
-        ),
+        errorBuilder:
+            (_, __, ___) => _iconBox(
+              Icons.broken_image_outlined,
+              AppColors.divider,
+              AppColors.textSecondary,
+            ),
       );
     }
-
-    switch (item.type) {
-      case 'link':
-        return _iconBox(Icons.link_rounded, AppColors.primaryLight, AppColors.primary);
-      case 'image':
-        return _iconBox(Icons.image_outlined, const Color(0xFFE8F5E9), const Color(0xFF43A047));
-      case 'memo':
-        return _iconBox(Icons.notes_rounded, const Color(0xFFFFF3E0), const Color(0xFFFF8F00));
-      default:
-        return _iconBox(Icons.insert_drive_file_outlined, AppColors.primaryLight, AppColors.primary);
+    if (item.type == 'link' &&
+        item.imageUrl != null &&
+        item.imageUrl!.isNotEmpty) {
+      return Image.network(
+        item.imageUrl!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder:
+            (_, __, ___) => _iconBox(
+              Icons.link_rounded,
+              AppColors.primaryLight,
+              AppColors.primary,
+            ),
+      );
     }
+    return switch (item.type) {
+      'link' => _iconBox(
+        Icons.link_rounded,
+        AppColors.primaryLight,
+        AppColors.primary,
+      ),
+      'image' => _iconBox(
+        Icons.image_outlined,
+        const Color(0xFFE8F5E9),
+        const Color(0xFF43A047),
+      ),
+      'memo' => _iconBox(
+        Icons.edit_note_rounded,
+        const Color(0xFFFFF3E0),
+        const Color(0xFFFF8F00),
+      ),
+      _ => _iconBox(
+        Icons.insert_drive_file_outlined,
+        AppColors.primaryLight,
+        AppColors.primary,
+      ),
+    };
   }
 
   Widget _iconBox(IconData icon, Color bg, Color iconColor) {
     return Container(
-      height: 72,
       width: double.infinity,
       color: bg,
-      child: Icon(icon, color: iconColor, size: 30),
-    );
-  }
-}
-
-class _TypeBadge extends StatelessWidget {
-  final String type;
-
-  const _TypeBadge({required this.type});
-
-  @override
-  Widget build(BuildContext context) {
-    final (label, color) = switch (type) {
-      'link' => ('링크', AppColors.primary),
-      'image' => ('이미지', const Color(0xFF43A047)),
-      'memo' => ('메모', const Color(0xFFFF8F00)),
-      _ => ('기타', AppColors.textSecondary),
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontFamily: 'Pretendard',
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
-      ),
+      child: Icon(icon, color: iconColor, size: 36),
     );
   }
 }

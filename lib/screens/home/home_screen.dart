@@ -5,6 +5,8 @@ import '../../models/content.dart';
 import '../../models/folder_item.dart';
 import '../../services/db_service.dart';
 import '../../shared/widgets/section_header.dart';
+import '../in_folder/in_folder_screen.dart';
+import '../content_detail/content_detail_screen.dart';
 import './widgets/stats_card.dart';
 import './widgets/banner_card.dart';
 import './widgets/page_dots.dart';
@@ -24,6 +26,8 @@ class HomeScreenState extends State<HomeScreen> {
   List<FolderItem> _folders = [];
   List<Content> _recentContents = [];
   int _totalCount = 0;
+
+  Map<int, FolderItem> get _folderMap => {for (final f in _folders) f.id: f};
 
   static const double _bannerHeight = 72.0;
   static const double _bannerOverlap = 36.0;
@@ -47,6 +51,26 @@ class HomeScreenState extends State<HomeScreen> {
         _totalCount = results[2] as int;
       });
     }
+  }
+
+  void _openContent(Content content, FolderItem? folder) {
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder:
+                (_) => ContentDetailScreen(
+                  item: content,
+                  folderName: folder?.name ?? '',
+                ),
+          ),
+        )
+        .then((_) => refresh());
+  }
+
+  void _openFolder(FolderItem folder) {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => InFolderScreen(folder: folder)))
+        .then((_) => refresh());
   }
 
   @override
@@ -108,11 +132,15 @@ class HomeScreenState extends State<HomeScreen> {
 
             // ── 최근 저장 섹션 ──
             const SectionHeader(title: '최근 저장', topPadding: 12),
-            RecentSavedList(items: _recentContents),
+            RecentSavedList(
+              items: _recentContents,
+              folderMap: _folderMap,
+              onTap: _openContent,
+            ),
 
             // ── 내 폴더 섹션 ──
             const SectionHeader(title: '내 폴더', topPadding: 20),
-            FolderListPreview(folders: _folders),
+            FolderListPreview(folders: _folders, onTap: _openFolder),
 
             const SizedBox(height: 100), // 하단 네비게이션 바 여백
           ],
