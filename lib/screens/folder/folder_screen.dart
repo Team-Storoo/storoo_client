@@ -3,6 +3,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '/models/folder_item.dart';
 import '../in_folder/in_folder_screen.dart';
+import '../pro/pro_screen.dart';
 import './widgets/folder_filter_row.dart';
 import './widgets/folder_grid.dart';
 import './widgets/create_folder_dialog.dart';
@@ -71,6 +72,13 @@ class FolderScreenState extends State<FolderScreen> {
     await DBService.saveCustomFolderOrder(
       _customOrderedFolders.map((f) => f.id).toList(),
     );
+  }
+
+  // ── PRO 화면 ─────────────────────────────────────────────────────────
+  Future<void> _openProScreen() async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const ProScreen()));
   }
 
   // ── 폴더 CRUD ───────────────────────────────────────────────────────
@@ -156,6 +164,18 @@ class FolderScreenState extends State<FolderScreen> {
             ),
           ),
           actions: [
+            // PRO 아이콘
+            GestureDetector(
+              onTap: _openProScreen,
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 10,
+                ),
+                child: Image.asset('assets/icons/PRO.png', height: 16),
+              ),
+            ),
             // 그리드/리스트 전환 버튼
             GestureDetector(
               onTap: () => setState(() => _isGridView = !_isGridView),
@@ -204,6 +224,8 @@ class FolderScreenState extends State<FolderScreen> {
                 onAddTap: _showCreateDialog,
                 onRenameTap: _renameFolder,
                 isListView: !_isGridView,
+                isFull: _folders.length >= 5,
+                onProTap: _openProScreen,
                 onFolderTap: (folder) async {
                   await Navigator.of(context).push(
                     MaterialPageRoute(

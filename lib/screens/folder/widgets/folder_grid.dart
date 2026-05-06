@@ -16,6 +16,8 @@ class FolderGrid extends StatelessWidget {
     this.isReorderable = false,
     this.isListView = false,
     this.onReorder,
+    this.isFull = false,
+    this.onProTap,
   });
 
   final List<FolderItem> folders;
@@ -26,6 +28,8 @@ class FolderGrid extends StatelessWidget {
   final bool isReorderable;
   final bool isListView;
   final void Function(int oldIndex, int newIndex)? onReorder;
+  final bool isFull;
+  final VoidCallback? onProTap;
 
   // ── 화면 빌드 ─────────────────────────────────────────────────────
   @override
@@ -42,6 +46,8 @@ class FolderGrid extends StatelessWidget {
         onFolderTap: onFolderTap,
         onDeleteTap: onDeleteTap,
         onRenameTap: onRenameTap,
+        isFull: isFull,
+        onProTap: onProTap,
       );
     }
     // 사용자 지정순 → 드래그 재정렬 그리드
@@ -53,6 +59,8 @@ class FolderGrid extends StatelessWidget {
         onDeleteTap: onDeleteTap,
         onRenameTap: onRenameTap,
         onReorder: onReorder!,
+        isFull: isFull,
+        onProTap: onProTap,
       );
     }
     // 일반 그리드
@@ -75,7 +83,8 @@ class FolderGrid extends StatelessWidget {
             onRenameTap: onRenameTap,
           );
         }
-        // 마지막 셀 → 폴더 추가 카드
+        // 마지막 셀 → 폴더 추가 or PRO 업그레이드 카드
+        if (isFull) return _ProUpgradeCard(onTap: onProTap ?? () {});
         return _AddCard(onTap: onAddTap);
       },
     );
@@ -91,6 +100,8 @@ class _FolderListView extends StatelessWidget {
     required this.onFolderTap,
     this.onDeleteTap,
     this.onRenameTap,
+    this.isFull = false,
+    this.onProTap,
   });
 
   final List<FolderItem> folders;
@@ -98,6 +109,8 @@ class _FolderListView extends StatelessWidget {
   final ValueChanged<FolderItem> onFolderTap;
   final ValueChanged<FolderItem>? onDeleteTap;
   final ValueChanged<FolderItem>? onRenameTap;
+  final bool isFull;
+  final VoidCallback? onProTap;
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +128,7 @@ class _FolderListView extends StatelessWidget {
             onRenameTap: onRenameTap,
           );
         }
+        if (isFull) return _ProUpgradeListRow(onTap: onProTap ?? () {});
         return _AddListRow(onTap: onAddTap);
       },
     );
@@ -213,6 +227,8 @@ class _ReorderableGrid extends StatefulWidget {
     required this.onReorder,
     this.onDeleteTap,
     this.onRenameTap,
+    this.isFull = false,
+    this.onProTap,
   });
 
   final List<FolderItem> folders;
@@ -221,6 +237,8 @@ class _ReorderableGrid extends StatefulWidget {
   final ValueChanged<FolderItem>? onDeleteTap;
   final ValueChanged<FolderItem>? onRenameTap;
   final void Function(int oldIndex, int newIndex) onReorder;
+  final bool isFull;
+  final VoidCallback? onProTap;
 
   @override
   State<_ReorderableGrid> createState() => _ReorderableGridState();
@@ -246,8 +264,10 @@ class _ReorderableGridState extends State<_ReorderableGrid> {
       ),
       itemCount: widget.folders.length + 1,
       itemBuilder: (context, i) {
-        // 마지막 셀 → 폴더 추가 카드
+        // 마지막 셀 → 폴더 추가 or PRO 업그레이드 카드
         if (i == widget.folders.length) {
+          if (widget.isFull)
+            return _ProUpgradeCard(onTap: widget.onProTap ?? () {});
           return _AddCard(onTap: widget.onAddTap);
         }
 
@@ -404,6 +424,119 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── PRO 그라데이션 상수 ────────────────────────────────────────────────
+
+const _kProGradient = LinearGradient(
+  colors: [Color(0xFF9138FF), Color(0xFFF95BF6), Color(0xFFFF7A41)],
+  begin: Alignment.centerLeft,
+  end: Alignment.centerRight,
+);
+
+/// 그리드 뷰용 PRO 업그레이드 카드 (그라데이션 아웃라인)
+class _ProUpgradeCard extends StatelessWidget {
+  const _ProUpgradeCard({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: _kProGradient,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Container(
+          margin: const EdgeInsets.all(1.5),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.5),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ShaderMask(
+                  shaderCallback: (b) => _kProGradient.createShader(b),
+                  child: const Icon(
+                    Icons.workspace_premium_rounded,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ShaderMask(
+                  shaderCallback: (b) => _kProGradient.createShader(b),
+                  child: Text(
+                    'PRO 구독하기',
+                    style: AppTextStyles.body.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 리스트 뷰용 PRO 업그레이드 행 (그라데이션 아웃라인)
+class _ProUpgradeListRow extends StatelessWidget {
+  const _ProUpgradeListRow({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: _kProGradient,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Container(
+          margin: const EdgeInsets.all(1.5),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.5),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ShaderMask(
+                shaderCallback: (b) => _kProGradient.createShader(b),
+                child: const Icon(
+                  Icons.workspace_premium_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 8),
+              ShaderMask(
+                shaderCallback: (b) => _kProGradient.createShader(b),
+                child: Text(
+                  'PRO 구독하기',
+                  style: AppTextStyles.body.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

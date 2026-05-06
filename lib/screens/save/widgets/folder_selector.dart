@@ -37,27 +37,28 @@ class FolderSelector extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text('저장 폴더', style: _labelStyle),
-            GestureDetector(
-              onTap: onAddFolder,
-              behavior: HitTestBehavior.opaque,
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.add_circle,
-                    size: 15,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '폴더 추가하기',
-                    style: AppTextStyles.caption.copyWith(
+            if (folders.length < 5)
+              GestureDetector(
+                onTap: onAddFolder,
+                behavior: HitTestBehavior.opaque,
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.add_circle,
+                      size: 15,
                       color: AppColors.primary,
-                      fontWeight: FontWeight.w500,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    Text(
+                      '폴더 추가하기',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
           ],
         ),
         const SizedBox(height: 12),
