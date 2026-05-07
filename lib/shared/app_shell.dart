@@ -21,6 +21,7 @@ class _AppShellState extends State<AppShell> {
 
   final _homeKey = GlobalKey<HomeScreenState>();
   final _folderKey = GlobalKey<FolderScreenState>();
+  final _myPageKey = GlobalKey<MyPageScreenState>();
 
   late final List<Widget> _screens = [
     HomeScreen(key: _homeKey),
@@ -29,13 +30,12 @@ class _AppShellState extends State<AppShell> {
       onContentSaved: () => _homeKey.currentState?.refresh(),
     ),
     const SearchScreen(),
-    const MyPageScreen(),
+    MyPageScreen(key: _myPageKey),
   ];
 
   void _onTabTapped(int index) {
-    if (index == 0) {
-      _homeKey.currentState?.refresh();
-    }
+    if (index == 0) _homeKey.currentState?.refresh();
+    if (index == 3) _myPageKey.currentState?.refresh();
     setState(() => _selectedIndex = index);
   }
 
@@ -52,6 +52,7 @@ class _AppShellState extends State<AppShell> {
     void onSaved() {
       _homeKey.currentState?.refresh();
       _folderKey.currentState?.refresh();
+      _myPageKey.currentState?.refresh();
     }
 
     Widget screen;

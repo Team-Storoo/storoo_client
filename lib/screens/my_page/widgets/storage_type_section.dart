@@ -7,10 +7,10 @@ class StorageTypeSection extends StatefulWidget {
   const StorageTypeSection({super.key});
 
   @override
-  State<StorageTypeSection> createState() => _StorageTypeSectionState();
+  State<StorageTypeSection> createState() => StorageTypeSectionState();
 }
 
-class _StorageTypeSectionState extends State<StorageTypeSection> {
+class StorageTypeSectionState extends State<StorageTypeSection> {
   int _linkCount = 0;
   int _imageCount = 0;
   int _memoCount = 0;
@@ -20,6 +20,8 @@ class _StorageTypeSectionState extends State<StorageTypeSection> {
     super.initState();
     _loadCounts();
   }
+
+  Future<void> refresh() => _loadCounts();
 
   Future<void> _loadCounts() async {
     final counts = await DBService.getContentCountsByType();

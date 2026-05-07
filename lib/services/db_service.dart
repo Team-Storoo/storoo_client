@@ -233,6 +233,12 @@ class DBService {
 
   static Future<void> deleteFolder(int id) async {
     await isar.writeTxn(() async {
+      final contentIds = await isar.contents
+          .filter()
+          .folderIdEqualTo(id)
+          .idProperty()
+          .findAll();
+      await isar.contents.deleteAll(contentIds);
       await isar.folderItems.delete(id);
     });
   }

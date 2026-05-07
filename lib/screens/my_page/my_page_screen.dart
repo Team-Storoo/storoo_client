@@ -18,16 +18,21 @@ class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
 
   @override
-  State<MyPageScreen> createState() => _MyPageScreenState();
+  State<MyPageScreen> createState() => MyPageScreenState();
 }
 
-class _MyPageScreenState extends State<MyPageScreen> {
+class MyPageScreenState extends State<MyPageScreen> {
   String _nickname = '';
+  final _storageKey = GlobalKey<StorageTypeSectionState>();
 
   @override
   void initState() {
     super.initState();
     _loadNickname();
+  }
+
+  Future<void> refresh() async {
+    await _storageKey.currentState?.refresh();
   }
 
   void _push(Widget screen) {
@@ -55,7 +60,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
             MyPageHeader(nickname: _nickname),
 
             // ── 저장 유형 분포 ──
-            const StorageTypeSection(),
+            StorageTypeSection(key: _storageKey),
 
             // ── 고객 지원 ──
             MyPageMenuSection(
