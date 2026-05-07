@@ -11,6 +11,7 @@ import '../widgets/folder_selector.dart';
 import '../widgets/memo_field.dart';
 import '../widgets/tag_input_row.dart';
 import '../widgets/save_button.dart';
+import '../../../shared/widgets/required_label.dart';
 
 /// 링크 저장 / 수정 화면
 /// 필수: 링크 URL, 제목, 저장 폴더
@@ -270,15 +271,7 @@ class _SaveLinkScreenState extends State<SaveLinkScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // ── 링크 ──
-                      const Text(
-                        '링크',
-                        style: TextStyle(
-                          fontFamily: 'Pretendard',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF888888),
-                        ),
-                      ),
+                      const RequiredLabel('링크'),
                       const SizedBox(height: 8),
                       _InputField(
                         controller: _linkCtrl,
@@ -289,15 +282,7 @@ class _SaveLinkScreenState extends State<SaveLinkScreen> {
                       const SizedBox(height: 20),
 
                       // ── 제목 ──
-                      const Text(
-                        '제목',
-                        style: TextStyle(
-                          fontFamily: 'Pretendard',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF888888),
-                        ),
-                      ),
+                      const RequiredLabel('제목'),
                       const SizedBox(height: 8),
                       _InputField(
                         controller: _titleCtrl,

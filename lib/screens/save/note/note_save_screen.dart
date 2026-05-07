@@ -10,6 +10,7 @@ import '../widgets/folder_selector.dart';
 import '../widgets/memo_field.dart';
 import '../widgets/tag_input_row.dart';
 import '../widgets/save_button.dart';
+import '../../../shared/widgets/required_label.dart';
 
 /// 노트 저장 / 수정 화면
 /// 필수: 노트 내용, 제목, 저장 폴더
@@ -257,15 +258,7 @@ class _SaveNoteScreenState extends State<SaveNoteScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // ── 노트 ──
-                      const Text(
-                        '노트',
-                        style: TextStyle(
-                          fontFamily: 'Pretendard',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF888888),
-                        ),
-                      ),
+                      const RequiredLabel('노트'),
                       const SizedBox(height: 8),
                       TextField(
                         controller: _noteCtrl,
@@ -299,15 +292,7 @@ class _SaveNoteScreenState extends State<SaveNoteScreen> {
                       const SizedBox(height: 20),
 
                       // ── 제목 ──
-                      const Text(
-                        '제목',
-                        style: TextStyle(
-                          fontFamily: 'Pretendard',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF888888),
-                        ),
-                      ),
+                      const RequiredLabel('제목'),
                       const SizedBox(height: 8),
                       _InputField(
                         controller: _titleCtrl,

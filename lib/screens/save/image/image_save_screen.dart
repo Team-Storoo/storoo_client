@@ -13,6 +13,7 @@ import '../widgets/folder_selector.dart';
 import '../widgets/memo_field.dart';
 import '../widgets/tag_input_row.dart';
 import '../widgets/save_button.dart';
+import '../../../shared/widgets/required_label.dart';
 
 /// 이미지 저장 / 수정 화면
 /// 필수: 이미지 1장 이상(최대 5장), 제목, 저장 폴더
@@ -284,15 +285,7 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // ── 이미지 ──
-                      const Text(
-                        '이미지',
-                        style: TextStyle(
-                          fontFamily: 'Pretendard',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF888888),
-                        ),
-                      ),
+                      const RequiredLabel('이미지'),
                       const SizedBox(height: 12),
                       _ImagePickerRow(
                         images: _images,
@@ -303,15 +296,7 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
                       const SizedBox(height: 20),
 
                       // ── 제목 ──
-                      const Text(
-                        '제목',
-                        style: TextStyle(
-                          fontFamily: 'Pretendard',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF888888),
-                        ),
-                      ),
+                      const RequiredLabel('제목'),
                       const SizedBox(height: 8),
                       _InputField(
                         controller: _titleCtrl,

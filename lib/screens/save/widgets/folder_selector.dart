@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../models/folder_item.dart';
+import '../../../shared/widgets/required_label.dart';
 
 /// 저장 폴더 선택 위젯
 /// - 2열 그리드로 폴더 목록 표시
@@ -36,7 +37,7 @@ class FolderSelector extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('저장 폴더', style: _labelStyle),
+            const RequiredLabel('저장 폴더'),
             if (folders.length < 5)
               GestureDetector(
                 onTap: onAddFolder,
