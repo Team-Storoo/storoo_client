@@ -8,6 +8,9 @@ class InFolderImageGrid extends StatelessWidget {
   final Future<void> Function(int id) onDelete;
   final String folderName;
   final void Function(Content item)? onTap;
+  final bool isEditMode;
+  final Set<int> selectedIds;
+  final void Function(int id)? onToggleSelect;
 
   const InFolderImageGrid({
     super.key,
@@ -15,6 +18,9 @@ class InFolderImageGrid extends StatelessWidget {
     required this.onDelete,
     required this.folderName,
     this.onTap,
+    this.isEditMode = false,
+    this.selectedIds = const {},
+    this.onToggleSelect,
   });
 
   @override
@@ -41,9 +47,14 @@ class InFolderImageGrid extends StatelessWidget {
         childAspectRatio: 1.0,
       ),
       itemCount: items.length,
-      itemBuilder:
-          (_, i) =>
-              _ImageCard(item: items[i], onDelete: onDelete, onTap: onTap),
+      itemBuilder: (_, i) => _ImageCard(
+        item: items[i],
+        onDelete: onDelete,
+        onTap: onTap,
+        isEditMode: isEditMode,
+        isSelected: selectedIds.contains(items[i].id),
+        onToggleSelect: onToggleSelect,
+      ),
     );
   }
 }
@@ -52,8 +63,18 @@ class _ImageCard extends StatelessWidget {
   final Content item;
   final Future<void> Function(int id) onDelete;
   final void Function(Content item)? onTap;
+  final bool isEditMode;
+  final bool isSelected;
+  final void Function(int id)? onToggleSelect;
 
-  const _ImageCard({required this.item, required this.onDelete, this.onTap});
+  const _ImageCard({
+    required this.item,
+    required this.onDelete,
+    this.onTap,
+    this.isEditMode = false,
+    this.isSelected = false,
+    this.onToggleSelect,
+  });
 
   void _showDeleteMenu(BuildContext context) {
     showModalBottomSheet(
@@ -89,40 +110,72 @@ class _ImageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onTap?.call(item),
-      onLongPress: () => _showDeleteMenu(context),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.divider),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child:
-              item.imageUrl != null && item.imageUrl!.isNotEmpty
+      onTap: isEditMode
+          ? () => onToggleSelect?.call(item.id)
+          : () => onTap?.call(item),
+      onLongPress: isEditMode ? null : () => _showDeleteMenu(context),
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F5F5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected ? AppColors.primary : AppColors.divider,
+                width: isSelected ? 2 : 1,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: item.imageUrl != null && item.imageUrl!.isNotEmpty
                   ? Image.file(
-                    File(item.imageUrl!),
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                    errorBuilder:
-                        (_, __, ___) => const Center(
-                          child: Icon(
-                            Icons.broken_image_outlined,
-                            color: AppColors.textSecondary,
-                            size: 32,
+                      File(item.imageUrl!),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                      errorBuilder:
+                          (_, __, ___) => const Center(
+                            child: Icon(
+                              Icons.broken_image_outlined,
+                              color: AppColors.textSecondary,
+                              size: 32,
+                            ),
                           ),
-                        ),
-                  )
+                    )
                   : const Center(
-                    child: Icon(
-                      Icons.image_outlined,
-                      color: AppColors.textSecondary,
-                      size: 32,
+                      child: Icon(
+                        Icons.image_outlined,
+                        color: AppColors.textSecondary,
+                        size: 32,
+                      ),
                     ),
+            ),
+          ),
+          if (isEditMode)
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected
+                      ? AppColors.primary
+                      : Colors.white.withValues(alpha: 0.85),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
+                    width: 2,
                   ),
-        ),
+                ),
+                child: isSelected
+                    ? const Icon(Icons.check, color: Colors.white, size: 14)
+                    : null,
+              ),
+            ),
+        ],
       ),
     );
   }

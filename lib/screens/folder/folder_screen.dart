@@ -113,6 +113,28 @@ class FolderScreenState extends State<FolderScreen> {
   }
 
   Future<void> _deleteFolder(FolderItem folder) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('폴더 삭제'),
+        content: Text('"${folder.name}" 폴더를 삭제할까요?\n저장된 항목도 함께 삭제됩니다.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              '삭제',
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || confirmed != true) return;
     await DBService.deleteFolder(folder.id);
     await _loadFolders();
   }

@@ -121,7 +121,7 @@ class _FolderListView extends StatelessWidget {
   }
 }
 
-class _FolderListRow extends StatelessWidget {
+class _FolderListRow extends StatefulWidget {
   const _FolderListRow({
     required this.folder,
     required this.onTap,
@@ -135,9 +135,62 @@ class _FolderListRow extends StatelessWidget {
   final ValueChanged<FolderItem>? onRenameTap;
 
   @override
+  State<_FolderListRow> createState() => _FolderListRowState();
+}
+
+class _FolderListRowState extends State<_FolderListRow> {
+  Offset _tapPosition = Offset.zero;
+
+  Future<void> _showMenu() async {
+    final size = MediaQuery.of(context).size;
+    final result = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        _tapPosition.dx,
+        _tapPosition.dy,
+        size.width - _tapPosition.dx,
+        size.height - _tapPosition.dy,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      items: [
+        PopupMenuItem(
+          value: 'rename',
+          height: 44,
+          child: Row(
+            children: [
+              const Icon(Icons.edit_outlined, size: 16, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(
+                '이름 수정',
+                style: AppTextStyles.body.copyWith(color: AppColors.primary),
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'delete',
+          height: 44,
+          child: Row(
+            children: [
+              const Icon(Icons.delete_outline, size: 16, color: AppColors.error),
+              const SizedBox(width: 8),
+              Text(
+                '삭제',
+                style: AppTextStyles.body.copyWith(color: AppColors.error),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+    if (result == 'rename') widget.onRenameTap?.call(widget.folder);
+    if (result == 'delete') widget.onDeleteTap?.call(widget.folder);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -151,16 +204,27 @@ class _FolderListRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(folder.name, style: AppTextStyles.subtitle),
+                  Text(widget.folder.name, style: AppTextStyles.subtitle),
                   const SizedBox(height: 4),
                   Text(
-                    '저장된 항목 ${folder.itemCount}개',
+                    '저장된 항목 ${widget.folder.itemCount}개',
                     style: AppTextStyles.caption,
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+            GestureDetector(
+              onTapDown: (d) => _tapPosition = d.globalPosition,
+              onTap: _showMenu,
+              child: const Padding(
+                padding: EdgeInsets.only(left: 8),
+                child: Icon(
+                  Icons.more_vert,
+                  size: 20,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
           ],
         ),
       ),

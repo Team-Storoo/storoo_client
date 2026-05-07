@@ -8,6 +8,9 @@ class InFolderLinkList extends StatelessWidget {
   final Future<void> Function(int id) onDelete;
   final String folderName;
   final void Function(Content item)? onTap;
+  final bool isEditMode;
+  final Set<int> selectedIds;
+  final void Function(int id)? onToggleSelect;
 
   const InFolderLinkList({
     super.key,
@@ -15,6 +18,9 @@ class InFolderLinkList extends StatelessWidget {
     required this.onDelete,
     required this.folderName,
     this.onTap,
+    this.isEditMode = false,
+    this.selectedIds = const {},
+    this.onToggleSelect,
   });
 
   @override
@@ -44,6 +50,9 @@ class InFolderLinkList extends StatelessWidget {
             folderName: folderName,
             onDelete: onDelete,
             onTap: onTap,
+            isEditMode: isEditMode,
+            isSelected: selectedIds.contains(items[i].id),
+            onToggleSelect: onToggleSelect,
           ),
     );
   }
@@ -54,12 +63,18 @@ class _LinkCard extends StatelessWidget {
   final String folderName;
   final Future<void> Function(int id) onDelete;
   final void Function(Content item)? onTap;
+  final bool isEditMode;
+  final bool isSelected;
+  final void Function(int id)? onToggleSelect;
 
   const _LinkCard({
     required this.item,
     required this.folderName,
     required this.onDelete,
     this.onTap,
+    this.isEditMode = false,
+    this.isSelected = false,
+    this.onToggleSelect,
   });
 
   void _showDeleteMenu(BuildContext context) {
@@ -101,11 +116,13 @@ class _LinkCard extends StatelessWidget {
     if (url == null || url.isEmpty) return '';
     try {
       final host = Uri.parse(url).host.toLowerCase();
-      if (host.contains('youtube.com') || host.contains('youtu.be'))
+      if (host.contains('youtube.com') || host.contains('youtu.be')) {
         return 'Youtube';
-      if (host.contains('instagram.com')) return 'Instagram';
-      if (host.contains('twitter.com') || host.contains('x.com'))
+      }
+      if (host.contains('instagram.com')) { return 'Instagram'; }
+      if (host.contains('twitter.com') || host.contains('x.com')) {
         return 'Twitter';
+      }
       if (host.contains('naver.com')) return 'Naver';
       if (host.contains('google.com')) return 'Google';
       if (host.contains('tiktok.com')) return 'TikTok';
@@ -154,6 +171,25 @@ class _LinkCard extends StatelessWidget {
     );
   }
 
+  Widget _buildSelectCircle() {
+    return Container(
+      width: 22,
+      height: 22,
+      margin: const EdgeInsets.only(top: 2),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isSelected ? AppColors.primary : Colors.transparent,
+        border: Border.all(
+          color: isSelected ? AppColors.primary : AppColors.textSecondary,
+          width: 2,
+        ),
+      ),
+      child: isSelected
+          ? const Icon(Icons.check, color: Colors.white, size: 14)
+          : null,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final source = _extractSource(item.url);
@@ -162,13 +198,19 @@ class _LinkCard extends StatelessWidget {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => onTap?.call(item),
-      onLongPress: () => _showDeleteMenu(context),
+      onTap: isEditMode
+          ? () => onToggleSelect?.call(item.id)
+          : () => onTap?.call(item),
+      onLongPress: isEditMode ? null : () => _showDeleteMenu(context),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (isEditMode) ...[
+              _buildSelectCircle(),
+              const SizedBox(width: 12),
+            ],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
