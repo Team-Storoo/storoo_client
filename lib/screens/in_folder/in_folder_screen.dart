@@ -200,17 +200,34 @@ class _InFolderScreenState extends State<InFolderScreen> {
     return result;
   }
 
-  int get _currentCount {
+  List<Content> get _currentItems {
     switch (_selectedTab) {
-      case 0:
-        return _filtered(_links).length;
-      case 1:
-        return _filtered(_images).length;
-      case 2:
-        return _filtered(_memos).length;
-      default:
-        return 0;
+      case 0: return _filtered(_links);
+      case 1: return _filtered(_images);
+      case 2: return _filtered(_memos);
+      default: return [];
     }
+  }
+
+  int get _currentCount => _currentItems.length;
+
+  bool get _isAllSelected {
+    final items = _currentItems;
+    return items.isNotEmpty && items.every((c) => _selectedIds.contains(c.id));
+  }
+
+  void _toggleSelectAll() {
+    setState(() {
+      if (_isAllSelected) {
+        for (final c in _currentItems) {
+          _selectedIds.remove(c.id);
+        }
+      } else {
+        for (final c in _currentItems) {
+          _selectedIds.add(c.id);
+        }
+      }
+    });
   }
 
   Future<void> _openDetail(Content item) async {
@@ -385,6 +402,12 @@ class _InFolderScreenState extends State<InFolderScreen> {
                   if (_isEditMode) _selectedIds.clear();
                 }),
               ),
+              if (_isEditMode)
+                _SelectAllBar(
+                  isAllSelected: _isAllSelected,
+                  totalCount: _currentItems.length,
+                  onTap: _toggleSelectAll,
+                ),
               if (!_isEditMode) ...[
                 InFolderSearchBar(
                   controller: _searchCtrl,
@@ -400,6 +423,74 @@ class _InFolderScreenState extends State<InFolderScreen> {
               Expanded(child: _buildTabContent()),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectAllBar extends StatelessWidget {
+  final bool isAllSelected;
+  final int totalCount;
+  final VoidCallback onTap;
+
+  const _SelectAllBar({
+    required this.isAllSelected,
+    required this.totalCount,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: const BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: AppColors.divider),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isAllSelected ? AppColors.primary : Colors.transparent,
+                border: Border.all(
+                  color: isAllSelected
+                      ? AppColors.primary
+                      : AppColors.textSecondary,
+                  width: 2,
+                ),
+              ),
+              child: isAllSelected
+                  ? const Icon(Icons.check, color: Colors.white, size: 14)
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              '전체 선택',
+              style: TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '총 $totalCount개',
+              style: const TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
       ),
     );
