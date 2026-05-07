@@ -174,7 +174,7 @@ class _FolderListRow extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+            const Icon(Icons.more_vert, color: AppColors.textSecondary),
           ],
         ),
       ),
