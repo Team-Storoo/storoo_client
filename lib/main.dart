@@ -90,7 +90,9 @@ class _ShareEntryPointState extends State<_ShareEntryPoint> {
   Future<void> _openSheet() async {
     final sharedText = await ShareIntentService.getInitialSharedText();
     if (!mounted) return;
-    await ShareSaveScreen.show(context, initialUrl: sharedText);
+    // 멀티라인 공유 텍스트("제목\nURL")에서 URL만 추출
+    final url = ShareIntentService.extractUrl(sharedText);
+    await ShareSaveScreen.show(context, initialUrl: url);
     SystemNavigator.pop();
   }
 

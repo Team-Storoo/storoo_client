@@ -25,4 +25,12 @@ class ShareIntentService {
       }
     });
   }
+
+  /// 공유된 텍스트에서 첫 번째 URL 추출
+  /// 일부 앱이 "제목\nURL" 형식으로 공유할 때 URL만 분리
+  static String? extractUrl(String? text) {
+    if (text == null || text.isEmpty) return null;
+    final match = RegExp(r'https?://\S+', caseSensitive: false).firstMatch(text);
+    return match?.group(0);
+  }
 }
