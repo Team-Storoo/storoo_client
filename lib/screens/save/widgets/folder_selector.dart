@@ -80,7 +80,7 @@ class FolderSelector extends StatelessWidget {
           itemCount: folders.length,
           itemBuilder: (_, i) {
             final folder = folders[i];
-            final isSelected = folder.id == selectedFolder?.id;
+            final isSelected = identical(folder, selectedFolder);
             return GestureDetector(
               onTap: () => onSelect(folder),
               child: Container(

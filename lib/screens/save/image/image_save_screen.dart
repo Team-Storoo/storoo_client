@@ -48,8 +48,8 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
   bool _loadingFolders = true;
   bool _saving = false;
 
-  /// 저장 버튼 누르기 전까지 DB에 저장하지 않는 임시 폴더
-  FolderItem? _pendingFolder;
+  /// 저장 버튼 누르기 전까지 DB에 저장하지 않는 임시 폴더 목록
+  final List<FolderItem> _pendingFolders = [];
 
   static const int _maxFolders = 5;
 
@@ -57,7 +57,7 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
 
   /// 변경사항 여부 — 뒤로가기 확인 팝업 표시 조건
   bool get _hasChanges {
-    if (_pendingFolder != null) return true;
+    if (_pendingFolders.isNotEmpty) return true;
     if (!_isEditing) {
       return _images.isNotEmpty ||
           _titleCtrl.text.isNotEmpty ||
@@ -135,7 +135,7 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
           ..createdAt = DateTime.now()
           ..itemCount = 0;
     setState(() {
-      _pendingFolder = tempFolder;
+      _pendingFolders.add(tempFolder);
       _folders = [..._folders, tempFolder];
       _selectedFolder = tempFolder;
     });
@@ -176,19 +176,20 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
     if (_saving) return;
     setState(() => _saving = true);
 
-    // 임시 폴더가 있으면 저장 시점에 DB에 실제로 생성합니다.
-    if (_pendingFolder != null && mounted) {
-      await DBService.saveFolder(_pendingFolder!);
-      final newId = _pendingFolder!.id;
+    // 임시 폴더 전체 DB 저장 (여러 개 지원)
+    if (_pendingFolders.isNotEmpty && mounted) {
+      for (final folder in _pendingFolders) {
+        await DBService.saveFolder(folder); // Isar가 id를 in-place 업데이트
+      }
+      final savedId = _selectedFolder?.id;
       final updated = await DBService.getFolders();
       if (!mounted) return;
       setState(() {
         _folders = updated;
-        _selectedFolder = _folders.firstWhere(
-          (f) => f.id == newId,
-          orElse: () => _folders.last,
-        );
-        _pendingFolder = null;
+        _selectedFolder = savedId != null
+            ? updated.firstWhere((f) => f.id == savedId, orElse: () => updated.last)
+            : updated.isNotEmpty ? updated.last : null;
+        _pendingFolders.clear();
       });
     }
 
