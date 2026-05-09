@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'services/db_service.dart';
+import 'services/share_intent_service.dart';
 import 'core/theme/app_theme.dart';
 import 'screens/splash/splash_screen.dart';
+import 'screens/share/share_save_screen.dart';
 
 /// 전체 앱에서 스크롤바를 숨기는 ScrollBehavior
 class _NoScrollbarBehavior extends MaterialScrollBehavior {
@@ -43,5 +46,56 @@ class MyApp extends StatelessWidget {
       ],
       home: const SplashScreen(),
     );
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// 공유 진입점: 외부 앱에서 공유 시 앱 본체 없이 바텀시트만 표시
+// ──────────────────────────────────────────────────────────────────────
+
+@pragma('vm:entry-point')
+void shareMain() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DBService.init();
+  runApp(const _ShareEntryApp());
+}
+
+class _ShareEntryApp extends StatelessWidget {
+  const _ShareEntryApp();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: AppTheme.light.copyWith(scaffoldBackgroundColor: Colors.transparent),
+      debugShowCheckedModeBanner: false,
+      home: const _ShareEntryPoint(),
+    );
+  }
+}
+
+class _ShareEntryPoint extends StatefulWidget {
+  const _ShareEntryPoint();
+
+  @override
+  State<_ShareEntryPoint> createState() => _ShareEntryPointState();
+}
+
+class _ShareEntryPointState extends State<_ShareEntryPoint> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _openSheet());
+  }
+
+  Future<void> _openSheet() async {
+    final sharedText = await ShareIntentService.getInitialSharedText();
+    if (!mounted) return;
+    await ShareSaveScreen.show(context, initialUrl: sharedText);
+    SystemNavigator.pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(backgroundColor: Colors.transparent);
   }
 }

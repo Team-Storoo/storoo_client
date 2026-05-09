@@ -15,12 +15,16 @@ class FolderSelector extends StatelessWidget {
     this.selectedFolder,
     required this.onSelect,
     required this.onAddFolder,
+    this.labelText,
   });
 
   final List<FolderItem> folders;
   final FolderItem? selectedFolder;
   final ValueChanged<FolderItem> onSelect;
   final VoidCallback onAddFolder;
+
+  /// null이면 기본 RequiredLabel('저장 폴더') 표시
+  final String? labelText;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +34,15 @@ class FolderSelector extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const RequiredLabel('저장 폴더'),
+            labelText != null
+                ? Text(
+                    labelText!,
+                    style: AppTextStyles.subtitle.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )
+                : const RequiredLabel('저장 폴더'),
             if (folders.length < 5)
               GestureDetector(
                 onTap: onAddFolder,
