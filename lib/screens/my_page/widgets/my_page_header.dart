@@ -5,8 +5,9 @@ import '../../../core/theme/app_text_styles.dart';
 /// 마이페이지 상단 보라 헤더
 class MyPageHeader extends StatelessWidget {
   final String nickname;
+  final VoidCallback? onEditTap;
 
-  const MyPageHeader({super.key, required this.nickname});
+  const MyPageHeader({super.key, required this.nickname, this.onEditTap});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +41,7 @@ class MyPageHeader extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: GestureDetector(
-              onTap: () {}, // TODO: 프로필 편집 화면 이동
+              onTap: onEditTap ?? () {},
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,

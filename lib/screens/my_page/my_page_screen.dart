@@ -13,6 +13,7 @@ import './policy/data_policy_screen.dart';
 import './settings/notification_screen.dart';
 import './settings/theme_screen.dart';
 import './settings/home_setting_screen.dart';
+import './profile_edit/profile_edit_screen.dart';
 
 /// 마이페이지 화면
 class MyPageScreen extends StatefulWidget {
@@ -58,7 +59,10 @@ class MyPageScreenState extends State<MyPageScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── 상단 보라 헤더 ──
-            MyPageHeader(nickname: _nickname),
+            MyPageHeader(
+              nickname: _nickname,
+              onEditTap: () => _push(const ProfileEditScreen()),
+            ),
 
             // ── 저장 유형 분포 ──
             StorageTypeSection(key: _storageKey),
