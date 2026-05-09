@@ -86,11 +86,7 @@ class ShareSaveBody extends StatelessWidget {
           ],
 
           // ── 태그 ──
-          TagInputRow(
-            tags: tags,
-            onAdd: onAddTag,
-            onRemove: onRemoveTag,
-          ),
+          TagInputRow(tags: tags, onAdd: onAddTag, onRemove: onRemoveTag),
         ],
       ),
     );
@@ -107,29 +103,30 @@ class _ShareImagePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
-      child: filePath != null
-          ? Image.file(
-              File(filePath!),
-              width: double.infinity,
-              height: 180,
-              fit: BoxFit.cover,
-            )
-          : Container(
-              width: double.infinity,
-              height: 180,
-              color: const Color(0xFFF5F5F5),
-              child: const Icon(Icons.image_not_supported_outlined,
-                  size: 48, color: Color(0xFFBDBDBD)),
-            ),
+      child:
+          filePath != null
+              ? Image.file(
+                File(filePath!),
+                width: double.infinity,
+                height: 180,
+                fit: BoxFit.cover,
+              )
+              : Container(
+                width: double.infinity,
+                height: 180,
+                color: const Color(0xFFF5F5F5),
+                child: const Icon(
+                  Icons.image_not_supported_outlined,
+                  size: 48,
+                  color: Color(0xFFBDBDBD),
+                ),
+              ),
     );
   }
 }
 
 class _ShareTitleField extends StatelessWidget {
-  const _ShareTitleField({
-    required this.controller,
-    required this.onChanged,
-  });
+  const _ShareTitleField({required this.controller, required this.onChanged});
 
   final TextEditingController controller;
   final VoidCallback onChanged;

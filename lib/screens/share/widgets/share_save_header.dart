@@ -8,11 +8,13 @@ class ShareSaveHeader extends StatelessWidget {
   const ShareSaveHeader({
     super.key,
     required this.canSave,
+    required this.isSaving,
     required this.onCancel,
     required this.onConfirm,
   });
 
   final bool canSave;
+  final bool isSaving;
   final VoidCallback onCancel;
   final VoidCallback onConfirm;
 
@@ -37,17 +39,27 @@ class ShareSaveHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: canSave ? onConfirm : null,
-                behavior: HitTestBehavior.opaque,
-                child: Text(
-                  '확인',
-                  style: AppTextStyles.body.copyWith(
-                    color: canSave ? AppColors.primary : AppColors.divider,
-                    fontWeight: FontWeight.w700,
+              if (isSaving)
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: AppColors.primary,
+                  ),
+                )
+              else
+                GestureDetector(
+                  onTap: canSave ? onConfirm : null,
+                  behavior: HitTestBehavior.opaque,
+                  child: Text(
+                    '저장',
+                    style: AppTextStyles.body.copyWith(
+                      color: canSave ? AppColors.primary : AppColors.divider,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 10),
