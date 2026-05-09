@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/content.dart';
 import '../models/user_profile.dart';
+import '../models/folder_item.dart';
 
 class DBService {
   static Isar? _isar;
@@ -28,7 +29,7 @@ class DBService {
     final dir = await getApplicationDocumentsDirectory();
 
     _isar = await Isar.open(
-      [ContentSchema, UserProfileSchema],
+      [ContentSchema, UserProfileSchema,  FolderItemSchema],
       directory: dir.path,
       name: 'storoo_db',
     );
@@ -83,12 +84,63 @@ class DBService {
     });
   }
 
-  static Future<List<Content>> getContents() async {
+  static Future<void> saveContentToFolder(Content content) async {
     if (kIsWeb) {
-      return [];
+      debugPrint("Saved content (dummy): ${content.title}");
+      return;
     }
 
+    await isar.writeTxn(() async {
+      await isar.contents.put(content);
+    });
+
+    if (content.folderId != null) {
+      await _syncFolderCount(content.folderId!);
+    }
+  }
+
+  static Future<List<Content>> getContents() async {
+    if (kIsWeb) return [];
     return await isar.contents.where().findAll();
+  }
+
+  static Future<List<Content>> getContentsByFolder(int folderId, String type) async {
+    if (kIsWeb) return [];
+    return await isar.contents
+        .filter()
+        .folderIdEqualTo(folderId)
+        .and()
+        .typeEqualTo(type)
+        .and()
+        .deletedAtIsNull()
+        .sortByCreatedAtDesc()
+        .findAll();
+  }
+
+  static Future<void> deleteContentAndSync(int contentId, int? folderId) async {
+    if (kIsWeb) return;
+    await isar.writeTxn(() async {
+      await isar.contents.delete(contentId);
+    });
+    if (folderId != null) {
+      await _syncFolderCount(folderId);
+    }
+  }
+
+  static Future<void> _syncFolderCount(int folderId) async {
+    if (kIsWeb) return;
+    final folder = await isar.folderItems.get(folderId);
+    if (folder == null) return;
+    final count = await isar.contents
+        .filter()
+        .folderIdEqualTo(folderId)
+        .and()
+        .deletedAtIsNull()
+        .count();
+    folder.itemCount = count;
+    await isar.writeTxn(() async {
+      await isar.folderItems.put(folder);
+    });
   }
 
   /// -------------------------
@@ -106,4 +158,111 @@ class DBService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kIntroKey, true);
   }
+
+  /// -------------------------
+  /// FolderItem 관련
+  /// -------------------------
+
+  static Future<void> saveFolder(FolderItem folder) async {
+    await isar.writeTxn(() async {
+      await isar.folderItems.put(folder);
+    });
+  }
+
+  static Future<List<FolderItem>> getFolders() async {
+    return await isar.folderItems.where().findAll();
+  }
+
+  static Future<List<Content>> getAllActiveContents() async {
+    if (kIsWeb) return [];
+    return await isar.contents.filter().deletedAtIsNull().findAll();
+  }
+
+  static Future<int> getTotalContentCount() async {
+    if (kIsWeb) return 0;
+    return await isar.contents.filter().deletedAtIsNull().count();
+  }
+
+  static Future<Map<String, int>> getContentCountsByType() async {
+    if (kIsWeb) return {'link': 0, 'image': 0, 'memo': 0};
+    final counts = <String, int>{'link': 0, 'image': 0, 'memo': 0};
+    for (final type in counts.keys) {
+      counts[type] = await isar.contents
+          .filter()
+          .typeEqualTo(type)
+          .deletedAtIsNull()
+          .count();
+    }
+    return counts;
+  }
+
+  static Future<List<Content>> getRecentContents({int limit = 10}) async {
+    if (kIsWeb) return [];
+    return await isar.contents
+        .filter()
+        .deletedAtIsNull()
+        .sortByCreatedAtDesc()
+        .limit(limit)
+        .findAll();
+  }
+
+  static Future<FolderItem?> getFolderById(int id) async {
+    if (kIsWeb) return null;
+    return await isar.folderItems.get(id);
+  }
+
+  /// Content 필드 업데이트 (title, content, tags 등)
+  static Future<void> updateContent(Content content) async {
+    if (kIsWeb) return;
+    await isar.writeTxn(() async {
+      await isar.contents.put(content);
+    });
+  }
+
+  /// Content 폴더 이동 (이전/새 폴더 itemCount 동기화)
+  static Future<void> moveContentToFolder(Content content, int oldFolderId) async {
+    if (kIsWeb) return;
+    await isar.writeTxn(() async {
+      await isar.contents.put(content);
+    });
+    await _syncFolderCount(oldFolderId);
+    if (content.folderId != null) {
+      await _syncFolderCount(content.folderId!);
+    }
+  }
+
+  static Future<void> deleteFolder(int id) async {
+    await isar.writeTxn(() async {
+      final contentIds = await isar.contents
+          .filter()
+          .folderIdEqualTo(id)
+          .idProperty()
+          .findAll();
+      await isar.contents.deleteAll(contentIds);
+      await isar.folderItems.delete(id);
+    });
+  }
+
+  /// -------------------------
+  /// 폴더 사용자 지정순
+  /// -------------------------
+
+  static const _kFolderOrderKey = 'folder_custom_order';
+
+  static Future<List<int>> getCustomFolderOrder() async {
+    final prefs = await SharedPreferences.getInstance();
+    final ids = prefs.getStringList(_kFolderOrderKey);
+    if (ids == null) return [];
+    return ids.map(int.parse).toList();
+  }
+
+  static Future<void> saveCustomFolderOrder(List<int> ids) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      _kFolderOrderKey,
+      ids.map((id) => id.toString()).toList(),
+    );
+  }
 }
+
+

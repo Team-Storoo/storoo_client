@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'services/db_service.dart';
 import 'core/theme/app_theme.dart';
 import 'screens/splash/splash_screen.dart';
@@ -15,7 +16,8 @@ class _NoScrollbarBehavior extends MaterialScrollBehavior {
   }
 }
 
-// widgetsFlutterBinding.ensureInitialized() → DBService.init() → runApp() 순서로 실행
+// widgetsFl
+// utterBinding.ensureInitialized() → DBService.init() → runApp() 순서로 실행
 // 앱 실행 전에 Isar DB가 준비되면, 이후 화면에서 바로 DB 사용 가능
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +34,13 @@ class MyApp extends StatelessWidget {
       title: 'Storoo',
       theme: AppTheme.light,
       scrollBehavior: _NoScrollbarBehavior(),
+      locale: const Locale('ko', 'KR'),
+      supportedLocales: const [Locale('ko', 'KR')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: const SplashScreen(),
     );
   }

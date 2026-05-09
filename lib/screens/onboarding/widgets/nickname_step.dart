@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -52,10 +51,7 @@ class NicknameStep extends StatelessWidget {
             ),
           ),
           style: AppTextStyles.body,
-          inputFormatters: [
-            // 한글, 영문 대소문자, 숫자, 밑줄(_), 마침표(.) 만 허용
-            FilteringTextInputFormatter.allow(RegExp(r'[가-힣a-zA-Z0-9_.]')),
-          ],
+          keyboardType: TextInputType.text,
           onChanged: (_) => onChanged(),
         ),
         const SizedBox(height: 12),

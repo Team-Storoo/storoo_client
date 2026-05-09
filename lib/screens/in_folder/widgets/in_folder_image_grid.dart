@@ -1,20 +1,30 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../models/content.dart';
 
-/// 이미지 탭 컨텐츠 — 2열 그리드
-///
-/// 저장된 이미지 목록을 2열 그리드로 표시합니다.
-/// 데이터가 없을 경우 빈 상태 메시지를 표시합니다.
 class InFolderImageGrid extends StatelessWidget {
-  final String searchQuery;
+  final List<Content> items;
+  final Future<void> Function(int id) onDelete;
+  final String folderName;
+  final void Function(Content item)? onTap;
+  final bool isEditMode;
+  final Set<int> selectedIds;
+  final void Function(int id)? onToggleSelect;
 
-  const InFolderImageGrid({super.key, required this.searchQuery});
+  const InFolderImageGrid({
+    super.key,
+    required this.items,
+    required this.onDelete,
+    required this.folderName,
+    this.onTap,
+    this.isEditMode = false,
+    this.selectedIds = const {},
+    this.onToggleSelect,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // TODO: 실제 이미지 데이터 연결 시 List<ImageItem>으로 교체
-    const items = <String>[];
-
     if (items.isEmpty) {
       return const Center(
         child: Text(
@@ -29,14 +39,144 @@ class InFolderImageGrid extends StatelessWidget {
     }
 
     return GridView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 4,
-        mainAxisSpacing: 4,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: 1.0,
       ),
       itemCount: items.length,
-      itemBuilder: (_, i) => const SizedBox.shrink(),
+      itemBuilder: (_, i) => _ImageCard(
+        item: items[i],
+        onDelete: onDelete,
+        onTap: onTap,
+        isEditMode: isEditMode,
+        isSelected: selectedIds.contains(items[i].id),
+        onToggleSelect: onToggleSelect,
+      ),
+    );
+  }
+}
+
+class _ImageCard extends StatelessWidget {
+  final Content item;
+  final Future<void> Function(int id) onDelete;
+  final void Function(Content item)? onTap;
+  final bool isEditMode;
+  final bool isSelected;
+  final void Function(int id)? onToggleSelect;
+
+  const _ImageCard({
+    required this.item,
+    required this.onDelete,
+    this.onTap,
+    this.isEditMode = false,
+    this.isSelected = false,
+    this.onToggleSelect,
+  });
+
+  void _showDeleteMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder:
+          (_) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.error,
+                  ),
+                  title: const Text(
+                    '삭제',
+                    style: TextStyle(
+                      fontFamily: 'Pretendard',
+                      color: AppColors.error,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    onDelete(item.id);
+                  },
+                ),
+              ],
+            ),
+          ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: isEditMode
+          ? () => onToggleSelect?.call(item.id)
+          : () => onTap?.call(item),
+      onLongPress: isEditMode ? null : () => _showDeleteMenu(context),
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F5F5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected ? AppColors.primary : AppColors.divider,
+                width: isSelected ? 2 : 1,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: item.imageUrl != null && item.imageUrl!.isNotEmpty
+                  ? Image.file(
+                      File(item.imageUrl!),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                      errorBuilder:
+                          (_, __, ___) => const Center(
+                            child: Icon(
+                              Icons.broken_image_outlined,
+                              color: AppColors.textSecondary,
+                              size: 32,
+                            ),
+                          ),
+                    )
+                  : const Center(
+                      child: Icon(
+                        Icons.image_outlined,
+                        color: AppColors.textSecondary,
+                        size: 32,
+                      ),
+                    ),
+            ),
+          ),
+          if (isEditMode)
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected
+                      ? AppColors.primary
+                      : Colors.white.withValues(alpha: 0.85),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
+                    width: 2,
+                  ),
+                ),
+                child: isSelected
+                    ? const Icon(Icons.check, color: Colors.white, size: 14)
+                    : null,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

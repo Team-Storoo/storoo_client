@@ -1,102 +1,148 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
-/// 정렬 방식 (최신순 / 오래된순)
-enum InFolderSort { newest, oldest }
+enum InFolderSort { relevant, newest, oldest }
 
-/// 폴더 내부 화면 — 검색결과 개수 + 정렬 옵션 헤더
-///
-/// 좌측: "검색결과 N" — N은 기본 보라색으로 강조
-/// 우측: "최신순 | 오래된순" — 선택된 항목 bold
 class InFolderSortHeader extends StatelessWidget {
   final int count;
   final InFolderSort sort;
   final ValueChanged<InFolderSort> onSortChanged;
+  final VoidCallback? onFilterTap;
 
   const InFolderSortHeader({
     super.key,
     required this.count,
     required this.sort,
     required this.onSortChanged,
+    this.onFilterTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RichText(
-            text: TextSpan(
-              children: [
-                const TextSpan(
-                  text: '검색결과 ',
-                  style: TextStyle(
-                    fontFamily: 'Pretendard',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
+          Row(
+            children: [
+              RichText(
+                text: TextSpan(
+                  children: [
+                    const TextSpan(
+                      text: '검색결과 ',
+                      style: TextStyle(
+                        fontFamily: 'Pretendard',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    TextSpan(
+                      text: '$count',
+                      style: const TextStyle(
+                        fontFamily: 'Pretendard',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
                 ),
-                TextSpan(
-                  text: '$count',
-                  style: const TextStyle(
-                    fontFamily: 'Pretendard',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
-                  ),
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: onFilterTap,
+                behavior: HitTestBehavior.opaque,
+                child: const Row(
+                  children: [
+                    Text(
+                      '필터',
+                      style: TextStyle(
+                        fontFamily: 'Pretendard',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(Icons.tune, size: 16, color: AppColors.textSecondary),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => onSortChanged(InFolderSort.newest),
-            behavior: HitTestBehavior.opaque,
-            child: Text(
-              '최신순',
-              style: TextStyle(
-                fontFamily: 'Pretendard',
-                fontSize: 13,
-                fontWeight: sort == InFolderSort.newest
-                    ? FontWeight.w700
-                    : FontWeight.w400,
-                color: sort == InFolderSort.newest
-                    ? AppColors.textPrimary
-                    : AppColors.textSecondary,
               ),
-            ),
+            ],
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              '|',
-              style: TextStyle(
-                fontFamily: 'Pretendard',
-                fontSize: 13,
-                color: AppColors.divider,
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _SortOption(
+                label: '관련순',
+                selected: sort == InFolderSort.relevant,
+                onTap: () => onSortChanged(InFolderSort.relevant),
               ),
-            ),
-          ),
-          GestureDetector(
-            onTap: () => onSortChanged(InFolderSort.oldest),
-            behavior: HitTestBehavior.opaque,
-            child: Text(
-              '오래된순',
-              style: TextStyle(
-                fontFamily: 'Pretendard',
-                fontSize: 13,
-                fontWeight: sort == InFolderSort.oldest
-                    ? FontWeight.w700
-                    : FontWeight.w400,
-                color: sort == InFolderSort.oldest
-                    ? AppColors.textPrimary
-                    : AppColors.textSecondary,
+              const _Divider(),
+              _SortOption(
+                label: '최신순',
+                selected: sort == InFolderSort.newest,
+                onTap: () => onSortChanged(InFolderSort.newest),
               ),
-            ),
+              const _Divider(),
+              _SortOption(
+                label: '오래된순',
+                selected: sort == InFolderSort.oldest,
+                onTap: () => onSortChanged(InFolderSort.oldest),
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SortOption extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SortOption({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Text(
+        label,
+        style: TextStyle(
+          fontFamily: 'Pretendard',
+          fontSize: 13,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+          color: selected ? AppColors.textPrimary : AppColors.textSecondary,
+        ),
+      ),
+    );
+  }
+}
+
+class _Divider extends StatelessWidget {
+  const _Divider();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8),
+      child: Text(
+        '|',
+        style: TextStyle(
+          fontFamily: 'Pretendard',
+          fontSize: 13,
+          color: AppColors.divider,
+        ),
       ),
     );
   }
