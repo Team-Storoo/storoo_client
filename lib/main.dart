@@ -56,25 +56,84 @@ class MyApp extends StatelessWidget {
 @pragma('vm:entry-point')
 void shareMain() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DBService.init();
-  runApp(const _ShareEntryApp());
+
+  // DB 초기화 + 공유 데이터 수집을 병렬로 처리
+  final results = await Future.wait([
+    DBService.init(),
+    ShareIntentService.getShareType(),
+    ShareIntentService.getInitialSharedText(),
+    ShareIntentService.getImagePath(),
+  ]);
+
+  final type = (results[1] as String?) ?? 'link';
+  final sharedText = results[2] as String?;
+  final imagePath = results[3] as String?;
+
+  String? url;
+  String? noteText;
+  String? imageFilePath;
+
+  if (type == 'link') {
+    url = ShareIntentService.extractUrl(sharedText);
+  } else if (type == 'note') {
+    noteText = sharedText;
+  } else if (type == 'image') {
+    imageFilePath = imagePath;
+  }
+
+  // 모든 데이터가 준비된 상태로 runApp → 첫 프레임에 즉시 바텀시트 표시
+  runApp(
+    _ShareEntryApp(
+      type: type,
+      initialUrl: url,
+      initialNote: noteText,
+      imageFilePath: imageFilePath,
+    ),
+  );
 }
 
 class _ShareEntryApp extends StatelessWidget {
-  const _ShareEntryApp();
+  const _ShareEntryApp({
+    this.type = 'link',
+    this.initialUrl,
+    this.initialNote,
+    this.imageFilePath,
+  });
+
+  final String type;
+  final String? initialUrl;
+  final String? initialNote;
+  final String? imageFilePath;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: AppTheme.light.copyWith(scaffoldBackgroundColor: Colors.transparent),
+      theme: AppTheme.light.copyWith(
+        scaffoldBackgroundColor: Colors.transparent,
+      ),
       debugShowCheckedModeBanner: false,
-      home: const _ShareEntryPoint(),
+      home: _ShareEntryPoint(
+        type: type,
+        initialUrl: initialUrl,
+        initialNote: initialNote,
+        imageFilePath: imageFilePath,
+      ),
     );
   }
 }
 
 class _ShareEntryPoint extends StatefulWidget {
-  const _ShareEntryPoint();
+  const _ShareEntryPoint({
+    this.type = 'link',
+    this.initialUrl,
+    this.initialNote,
+    this.imageFilePath,
+  });
+
+  final String type;
+  final String? initialUrl;
+  final String? initialNote;
+  final String? imageFilePath;
 
   @override
   State<_ShareEntryPoint> createState() => _ShareEntryPointState();
@@ -84,33 +143,18 @@ class _ShareEntryPointState extends State<_ShareEntryPoint> {
   @override
   void initState() {
     super.initState();
+    // 데이터가 이미 준비됐으므로 첫 프레임에 바로 바텀시트 표시
     WidgetsBinding.instance.addPostFrameCallback((_) => _openSheet());
   }
 
   Future<void> _openSheet() async {
-    final type = await ShareIntentService.getShareType();
-    final sharedText = await ShareIntentService.getInitialSharedText();
-
-    String? url;
-    String? noteText;
-    String? imageFilePath;
-
-    if (type == 'link') {
-      // 멀티라인 공유 텍스트("제목\nURL")에서 URL만 추출
-      url = ShareIntentService.extractUrl(sharedText);
-    } else if (type == 'note') {
-      noteText = sharedText;
-    } else if (type == 'image') {
-      imageFilePath = await ShareIntentService.getImagePath();
-    }
-
     if (!mounted) return;
     await ShareSaveScreen.show(
       context,
-      type: type,
-      initialUrl: url,
-      initialNote: noteText,
-      imageFilePath: imageFilePath,
+      type: widget.type,
+      initialUrl: widget.initialUrl,
+      initialNote: widget.initialNote,
+      imageFilePath: widget.imageFilePath,
     );
     SystemNavigator.pop();
   }
