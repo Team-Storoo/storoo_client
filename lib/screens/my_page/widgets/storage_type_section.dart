@@ -140,7 +140,7 @@ class _StorageTypeRow extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         SizedBox(
-          width: 36,
+          width: 44,
           child: Text(
             percent,
             textAlign: TextAlign.right,

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 /// Open Graph 메타 태그 파싱 서비스
@@ -24,7 +25,18 @@ class OgMetaService {
 
       if (response.statusCode != 200) return const OgMeta();
 
-      final body = response.body;
+      // Content-Type 헤더의 charset 확인
+      final contentType = response.headers['content-type'] ?? '';
+      final charsetMatch =
+          RegExp(r'charset=([\w-]+)', caseSensitive: false)
+              .firstMatch(contentType);
+      final charset = charsetMatch?.group(1)?.toLowerCase() ?? 'utf-8';
+
+      // UTF-8 또는 미지정: 명시적 UTF-8 디코드
+      // EUC-KR 등 비UTF-8: allowMalformed=true 로 최선 시도
+      final body = (charset == 'utf-8' || charset == 'utf8')
+          ? utf8.decode(response.bodyBytes)
+          : utf8.decode(response.bodyBytes, allowMalformed: true);
       final title =
           _ogTag(body, 'og:title') ??
           _ogTag(body, 'twitter:title') ??
