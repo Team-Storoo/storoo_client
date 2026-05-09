@@ -8,6 +8,7 @@ import './widgets/folder_filter_row.dart';
 import './widgets/folder_grid.dart';
 import './widgets/create_folder_dialog.dart';
 import '../../services/db_service.dart';
+import '../../shared/widgets/confirm_action_dialog.dart';
 
 /// 폴더 화면
 /// DB에 저장된 폴더 목록 관리
@@ -121,28 +122,14 @@ class FolderScreenState extends State<FolderScreen> {
   }
 
   Future<void> _deleteFolder(FolderItem folder) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('폴더 삭제'),
-        content: Text('"${folder.name}" 폴더를 삭제할까요?\n저장된 항목도 함께 삭제됩니다.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              '삭제',
-              style: TextStyle(color: AppColors.error),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await ConfirmActionDialog.show(
+      context,
+      iconColor: AppColors.primary,
+      title: '이 폴더를 삭제하시겠어요?',
+      message: '폴더를 삭제하면, 안에 담긴 콘텐츠도 함께 삭제되고 다시 복구할 수 없어요.',
+      confirmLabel: '삭제',
     );
-    if (!mounted || confirmed != true) return;
+    if (!mounted || !confirmed) return;
     await DBService.deleteFolder(folder.id);
     await _loadFolders();
   }
