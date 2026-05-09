@@ -22,13 +22,6 @@ class FolderSelector extends StatelessWidget {
   final ValueChanged<FolderItem> onSelect;
   final VoidCallback onAddFolder;
 
-  static const _labelStyle = TextStyle(
-    fontFamily: 'Pretendard',
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    color: Color(0xFF888888),
-  );
-
   @override
   Widget build(BuildContext context) {
     return Column(
