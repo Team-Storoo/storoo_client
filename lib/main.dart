@@ -88,11 +88,30 @@ class _ShareEntryPointState extends State<_ShareEntryPoint> {
   }
 
   Future<void> _openSheet() async {
+    final type = await ShareIntentService.getShareType();
     final sharedText = await ShareIntentService.getInitialSharedText();
+
+    String? url;
+    String? noteText;
+    String? imageFilePath;
+
+    if (type == 'link') {
+      // 멀티라인 공유 텍스트("제목\nURL")에서 URL만 추출
+      url = ShareIntentService.extractUrl(sharedText);
+    } else if (type == 'note') {
+      noteText = sharedText;
+    } else if (type == 'image') {
+      imageFilePath = await ShareIntentService.getImagePath();
+    }
+
     if (!mounted) return;
-    // 멀티라인 공유 텍스트("제목\nURL")에서 URL만 추출
-    final url = ShareIntentService.extractUrl(sharedText);
-    await ShareSaveScreen.show(context, initialUrl: url);
+    await ShareSaveScreen.show(
+      context,
+      type: type,
+      initialUrl: url,
+      initialNote: noteText,
+      imageFilePath: imageFilePath,
+    );
     SystemNavigator.pop();
   }
 

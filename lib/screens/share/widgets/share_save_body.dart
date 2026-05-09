@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -12,6 +13,8 @@ import '../../save/widgets/tag_input_row.dart';
 class ShareSaveBody extends StatelessWidget {
   const ShareSaveBody({
     super.key,
+    this.type = 'link',
+    this.imageFilePath,
     required this.folders,
     required this.selectedFolder,
     required this.onSelectFolder,
@@ -26,6 +29,9 @@ class ShareSaveBody extends StatelessWidget {
     this.loadingFolders = false,
   });
 
+  /// "link" | "note" | "image"
+  final String type;
+  final String? imageFilePath;
   final List<FolderItem> folders;
   final FolderItem? selectedFolder;
   final ValueChanged<FolderItem> onSelectFolder;
@@ -73,9 +79,11 @@ class ShareSaveBody extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // ── 메모 ──
-          MemoField(controller: memoController, onChanged: onMemoChanged),
-          const SizedBox(height: 20),
+          // ── 메모 (노트 타입 제외) ──
+          if (type != 'note') ...[
+            MemoField(controller: memoController, onChanged: onMemoChanged),
+            const SizedBox(height: 20),
+          ],
 
           // ── 태그 ──
           TagInputRow(
@@ -85,6 +93,34 @@ class ShareSaveBody extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 공유된 이미지 미리보기 (이미지 타입 전용)
+class _ShareImagePreview extends StatelessWidget {
+  const _ShareImagePreview({this.filePath});
+
+  final String? filePath;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: filePath != null
+          ? Image.file(
+              File(filePath!),
+              width: double.infinity,
+              height: 180,
+              fit: BoxFit.cover,
+            )
+          : Container(
+              width: double.infinity,
+              height: 180,
+              color: const Color(0xFFF5F5F5),
+              child: const Icon(Icons.image_not_supported_outlined,
+                  size: 48, color: Color(0xFFBDBDBD)),
+            ),
     );
   }
 }

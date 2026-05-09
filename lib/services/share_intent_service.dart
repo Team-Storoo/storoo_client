@@ -6,11 +6,28 @@ import 'package:flutter/services.dart';
 class ShareIntentService {
   static const _channel = MethodChannel('com.example.storoo/share');
 
-  /// 앱 시작 시 공유된 텍스트(URL) 조회 (1회성)
-  /// 조회 후 Android 측 값은 초기화됨
+  /// 공유 타입 조회: "link" | "note" | "image"
+  static Future<String> getShareType() async {
+    try {
+      return await _channel.invokeMethod<String>('getShareType') ?? 'link';
+    } catch (_) {
+      return 'link';
+    }
+  }
+
+  /// 앱 시작 시 공유된 텍스트(URL 또는 일반 텍스트) 조회 (1회성)
   static Future<String?> getInitialSharedText() async {
     try {
       return await _channel.invokeMethod<String>('getSharedText');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// 이미지 공유 시 캐시에 복사된 파일 경로 조회
+  static Future<String?> getImagePath() async {
+    try {
+      return await _channel.invokeMethod<String>('getImagePath');
     } catch (_) {
       return null;
     }

@@ -13,16 +13,26 @@ import 'widgets/share_save_header.dart';
 class ShareSaveScreen extends StatefulWidget {
   const ShareSaveScreen({
     super.key,
+    this.type = 'link',
     this.initialUrl,
+    this.initialNote,
+    this.imageFilePath,
     this.onSaved,
   });
 
+  /// 공유 타입: "link" | "note" | "image"
+  final String type;
   final String? initialUrl;
+  final String? initialNote;
+  final String? imageFilePath;
   final VoidCallback? onSaved;
 
   static Future<void> show(
     BuildContext context, {
+    String type = 'link',
     String? initialUrl,
+    String? initialNote,
+    String? imageFilePath,
     VoidCallback? onSaved,
   }) {
     return showModalBottomSheet(
@@ -35,7 +45,13 @@ class ShareSaveScreen extends StatefulWidget {
       ),
       builder: (_) => SizedBox(
         height: MediaQuery.of(context).size.height * 0.88,
-        child: ShareSaveScreen(initialUrl: initialUrl, onSaved: onSaved),
+        child: ShareSaveScreen(
+          type: type,
+          initialUrl: initialUrl,
+          initialNote: initialNote,
+          imageFilePath: imageFilePath,
+          onSaved: onSaved,
+        ),
       ),
     );
   }
@@ -133,24 +149,47 @@ class _ShareSaveScreenState extends State<ShareSaveScreen> {
       });
     }
 
-    final url = widget.initialUrl?.trim();
-    OgMeta? meta;
-    if (url != null && url.isNotEmpty) {
-      meta = await OgMetaService.fetch(url);
+    final Content content;
+    final memo = _memoCtrl.text.trim();
+
+    if (widget.type == 'image') {
+      // ── 이미지 저장 ────────────────────────────────────────────
+      content = Content()
+        ..type = 'image'
+        ..folderId = _selectedFolder!.id
+        ..title = _titleCtrl.text.trim()
+        ..imageUrl = widget.imageFilePath
+        ..content = memo.isEmpty ? null : memo
+        ..tags = List.from(_tags)
+        ..createdAt = DateTime.now();
+    } else if (widget.type == 'note') {
+      // ── 노트 저장 (메모 없음) ───────────────────────────────────
+      content = Content()
+        ..type = 'memo'
+        ..folderId = _selectedFolder!.id
+        ..title = _titleCtrl.text.trim()
+        ..content = widget.initialNote?.trim()
+        ..tags = List.from(_tags)
+        ..createdAt = DateTime.now();
+    } else {
+      // ── 링크 저장 (기본) ────────────────────────────────────────
+      final url = widget.initialUrl?.trim();
+      OgMeta? meta;
+      if (url != null && url.isNotEmpty) {
+        meta = await OgMetaService.fetch(url);
+      }
+      content = Content()
+        ..type = 'link'
+        ..folderId = _selectedFolder!.id
+        ..title = _titleCtrl.text.trim()
+        ..url = url
+        ..description = meta?.title
+        ..imageUrl = meta?.imageUrl
+        ..content = memo.isEmpty ? null : memo
+        ..tags = List.from(_tags)
+        ..createdAt = DateTime.now();
     }
 
-    final memo = _memoCtrl.text.trim();
-    final content =
-        Content()
-          ..type = 'link'
-          ..folderId = _selectedFolder!.id
-          ..title = _titleCtrl.text.trim()
-          ..url = url
-          ..description = meta?.title
-          ..imageUrl = meta?.imageUrl
-          ..content = memo.isEmpty ? null : memo
-          ..tags = List.from(_tags)
-          ..createdAt = DateTime.now();
     await DBService.saveContentToFolder(content);
 
     if (mounted) {
@@ -166,11 +205,14 @@ class _ShareSaveScreenState extends State<ShareSaveScreen> {
       children: [
         ShareSaveHeader(
           canSave: _canSave && !_saving,
+          isSaving: _saving,
           onCancel: () => Navigator.of(context).pop(),
           onConfirm: _save,
         ),
         Expanded(
           child: ShareSaveBody(
+            type: widget.type,
+            imageFilePath: widget.imageFilePath,
             folders: _folders,
             selectedFolder: _selectedFolder,
             onSelectFolder: (f) => setState(() => _selectedFolder = f),
