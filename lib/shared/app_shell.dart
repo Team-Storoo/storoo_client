@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'widgets/nav_bar.dart';
 import '../core/theme/app_colors.dart';
+import 'widgets/confirm_action_dialog.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/folder/folder_screen.dart';
 import '../screens/search/search_screen.dart';
@@ -67,32 +69,52 @@ class _AppShellState extends State<AppShell> {
     await Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
   }
 
+  Future<bool> _onWillPop() async {
+    return ConfirmActionDialog.show(
+      context,
+      iconColor: AppColors.primary,
+      title: '앱을 종료하시겠어요?',
+      message: '언제든지 Storoo로 돌아오실 수 있습니다!',
+      confirmLabel: '종료',
+      confirmColor: AppColors.primary,
+      cancelLabel: '취소',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      body: IndexedStack(index: _selectedIndex, children: _screens),
-      bottomNavigationBar: SizedBox(
-        height: 92,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: AppNavBar(
-                selectedIndex: _selectedIndex,
-                onTap: _onTabTapped,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final exit = await _onWillPop();
+        if (exit) SystemNavigator.pop();
+      },
+      child: Scaffold(
+        extendBody: true,
+        body: IndexedStack(index: _selectedIndex, children: _screens),
+        bottomNavigationBar: SizedBox(
+          height: 92,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: AppNavBar(
+                  selectedIndex: _selectedIndex,
+                  onTap: _onTabTapped,
+                ),
               ),
-            ),
-            Positioned(
-              bottom: 36,
-              left: 0,
-              right: 0,
-              child: Center(child: _SaveFab(onTap: _onSaveFabTapped)),
-            ),
-          ],
+              Positioned(
+                bottom: 36,
+                left: 0,
+                right: 0,
+                child: Center(child: _SaveFab(onTap: _onSaveFabTapped)),
+              ),
+            ],
+          ),
         ),
       ),
     );
