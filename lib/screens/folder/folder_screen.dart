@@ -127,6 +127,7 @@ class FolderScreenState extends State<FolderScreen> {
       iconColor: AppColors.primary,
       title: '이 폴더를 삭제하시겠어요?',
       message: '폴더를 삭제하면, 안에 담긴 콘텐츠도 함께 삭제되고 다시 복구할 수 없어요.',
+      messageColor: AppColors.error,
       confirmLabel: '삭제',
     );
     if (!mounted || !confirmed) return;

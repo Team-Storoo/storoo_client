@@ -25,6 +25,7 @@ class ConfirmActionDialog extends StatelessWidget {
     required this.iconColor,
     required this.title,
     required this.message,
+    this.messageColor = AppColors.textSecondary,
     this.confirmLabel = '확인',
     this.confirmColor = AppColors.error,
     this.cancelLabel = '취소',
@@ -33,6 +34,7 @@ class ConfirmActionDialog extends StatelessWidget {
   final Color iconColor;
   final String title;
   final String message;
+  final Color messageColor;
   final String confirmLabel;
   final Color confirmColor;
   final String cancelLabel;
@@ -42,6 +44,7 @@ class ConfirmActionDialog extends StatelessWidget {
     required Color iconColor,
     required String title,
     required String message,
+    Color messageColor = AppColors.textSecondary,
     String confirmLabel = '확인',
     Color confirmColor = AppColors.error,
     String cancelLabel = '취소',
@@ -54,6 +57,7 @@ class ConfirmActionDialog extends StatelessWidget {
             iconColor: iconColor,
             title: title,
             message: message,
+            messageColor: messageColor,
             confirmLabel: confirmLabel,
             confirmColor: confirmColor,
             cancelLabel: cancelLabel,
@@ -93,11 +97,11 @@ class ConfirmActionDialog extends StatelessWidget {
             Text(title, style: AppTextStyles.headline2),
             const SizedBox(height: 10),
 
-            // ── 안내 문구 (좌측 정렬, 빨간색) ───────────────────────
+            // ── 안내 문구 ───────────────────────────────────────────
             Text(
               message,
               style: AppTextStyles.body.copyWith(
-                color: AppColors.error,
+                color: messageColor,
                 height: 1.5,
               ),
             ),
@@ -118,7 +122,12 @@ class ConfirmActionDialog extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: Text(cancelLabel, style: AppTextStyles.body),
+                    child: Text(
+                      cancelLabel,
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -137,7 +146,10 @@ class ConfirmActionDialog extends StatelessWidget {
                     ),
                     child: Text(
                       confirmLabel,
-                      style: AppTextStyles.body.copyWith(color: Colors.white),
+                      style: AppTextStyles.body.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
