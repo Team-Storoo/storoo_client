@@ -164,10 +164,10 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
                   ),
                 ),
 
-              if (_item.type == 'image' && _item.imageUrl?.isNotEmpty == true)
+              if (_item.type == 'image' && _item.effectiveImageUrls.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 24),
-                  child: DetailImageCarousel(imagePaths: [_item.imageUrl!]),
+                  child: DetailImageCarousel(imagePaths: _item.effectiveImageUrls),
                 ),
 
               if (_item.type == 'memo')

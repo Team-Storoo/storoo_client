@@ -153,25 +153,17 @@ class _ShareSaveScreenState extends State<ShareSaveScreen> {
     final memo = _memoCtrl.text.trim();
 
     if (widget.type == 'image') {
-      // ── 이미지 저장: 각 경로마다 Content 1개씩 생성 ──────────
-      final title = _titleCtrl.text.trim();
-      for (final path in widget.imageFilePaths) {
-        final img = Content()
-          ..type = 'image'
-          ..folderId = _selectedFolder!.id
-          ..title = title
-          ..imageUrl = path
-          ..content = memo.isEmpty ? null : memo
-          ..tags = List.from(_tags)
-          ..createdAt = DateTime.now();
-        await DBService.saveContentToFolder(img);
-      }
-      if (mounted) {
-        setState(() => _saving = false);
-        widget.onSaved?.call();
-        Navigator.of(context).pop();
-      }
-      return;
+      // ── 이미지 저장: 다중 경로를 Content 1개에 저장 ──────────
+      final paths = widget.imageFilePaths;
+      content = Content()
+        ..type = 'image'
+        ..folderId = _selectedFolder!.id
+        ..title = _titleCtrl.text.trim()
+        ..imageUrls = paths
+        ..imageUrl = paths.isNotEmpty ? paths.first : null
+        ..content = memo.isEmpty ? null : memo
+        ..tags = List.from(_tags)
+        ..createdAt = DateTime.now();
     } else if (widget.type == 'note') {
       // ── 노트 저장 (메모 없음) ───────────────────────────────────
       content = Content()

@@ -127,28 +127,53 @@ class _ImageCard extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: item.imageUrl != null && item.imageUrl!.isNotEmpty
-                  ? Image.file(
-                      File(item.imageUrl!),
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                      errorBuilder:
-                          (_, __, ___) => const Center(
-                            child: Icon(
-                              Icons.broken_image_outlined,
-                              color: AppColors.textSecondary,
-                              size: 32,
+              child: () {
+                final thumb = item.effectiveImageUrls.isNotEmpty
+                    ? item.effectiveImageUrls.first
+                    : null;
+                return thumb != null
+                    ? Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.file(
+                            File(thumb),
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            errorBuilder: (_, __, ___) => const Center(
+                              child: Icon(Icons.broken_image_outlined,
+                                  color: AppColors.textSecondary, size: 32),
                             ),
                           ),
-                    )
-                  : const Center(
-                      child: Icon(
-                        Icons.image_outlined,
-                        color: AppColors.textSecondary,
-                        size: 32,
-                      ),
-                    ),
+                          // 다중 이미지 뱃지
+                          if (item.effectiveImageUrls.length > 1)
+                            Positioned(
+                              top: 6,
+                              right: 6,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 5, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  '${item.effectiveImageUrls.length}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      )
+                    : const Center(
+                        child: Icon(Icons.image_outlined,
+                            color: AppColors.textSecondary, size: 32),
+                      );
+              }(),
             ),
           ),
           if (isEditMode)

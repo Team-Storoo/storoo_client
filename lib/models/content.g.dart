@@ -52,6 +52,11 @@ const ContentSchema = CollectionSchema(
       name: r'imageUrl',
       type: IsarType.string,
     ),
+    r'imageUrls': PropertySchema(
+      id: 11,
+      name: r'imageUrls',
+      type: IsarType.stringList,
+    ),
     r'tags': PropertySchema(
       id: 7,
       name: r'tags',
@@ -111,6 +116,13 @@ int _contentEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.imageUrls.length * 3;
+  {
+    for (var i = 0; i < object.imageUrls.length; i++) {
+      final value = object.imageUrls[i];
+      bytesCount += value.length * 3;
+    }
+  }
   bytesCount += 3 + object.tags.length * 3;
   {
     for (var i = 0; i < object.tags.length; i++) {
@@ -142,6 +154,7 @@ void _contentSerialize(
   writer.writeBool(offsets[4], object.favorite);
   writer.writeLong(offsets[5], object.folderId);
   writer.writeString(offsets[6], object.imageUrl);
+  writer.writeStringList(offsets[11], object.imageUrls);
   writer.writeStringList(offsets[7], object.tags);
   writer.writeString(offsets[8], object.title);
   writer.writeString(offsets[9], object.type);
@@ -163,6 +176,7 @@ Content _contentDeserialize(
   object.folderId = reader.readLongOrNull(offsets[5]);
   object.id = id;
   object.imageUrl = reader.readStringOrNull(offsets[6]);
+  object.imageUrls = reader.readStringList(offsets[11]) ?? [];
   object.tags = reader.readStringList(offsets[7]) ?? [];
   object.title = reader.readString(offsets[8]);
   object.type = reader.readString(offsets[9]);
@@ -191,6 +205,8 @@ P _contentDeserializeProp<P>(
       return (reader.readLongOrNull(offset)) as P;
     case 6:
       return (reader.readStringOrNull(offset)) as P;
+    case 11:
+      return (reader.readStringList(offset) ?? []) as P;
     case 7:
       return (reader.readStringList(offset) ?? []) as P;
     case 8:

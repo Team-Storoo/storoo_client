@@ -143,11 +143,9 @@ class _RecentItemCard extends StatelessWidget {
   }
 
   Widget _buildImage() {
-    if (item.type == 'image' &&
-        item.imageUrl != null &&
-        item.imageUrl!.isNotEmpty) {
+    if (item.type == 'image' && item.effectiveImageUrls.isNotEmpty) {
       return Image.file(
-        File(item.imageUrl!),
+        File(item.effectiveImageUrls.first),
         fit: BoxFit.cover,
         width: double.infinity,
         errorBuilder:

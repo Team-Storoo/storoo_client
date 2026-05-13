@@ -84,7 +84,10 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
       _titleCtrl.text = c.title;
       _memoCtrl.text = c.content ?? '';
       _tags.addAll(c.tags);
-      if (c.imageUrl?.isNotEmpty == true) {
+      // imageUrls 우선, 없으면 imageUrl fallback
+      if (c.imageUrls.isNotEmpty) {
+        _images.addAll(c.imageUrls.map(XFile.new));
+      } else if (c.imageUrl?.isNotEmpty == true) {
         _images.add(XFile(c.imageUrl!));
       }
     }
@@ -147,7 +150,7 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
       final remaining = _maxImages - _images.length;
       final files = await ImagePicker().pickMultiImage(limit: remaining);
       if (files.isEmpty || !mounted) return;
-      setState(() => _images.addAll(files));
+      setState(() => _images.addAll(files.take(remaining)));
     } catch (_) {}
   }
 
@@ -202,24 +205,24 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
       c.content = memo.isEmpty ? null : memo;
       c.tags = List.from(_tags);
       c.folderId = _selectedFolder!.id;
+      c.imageUrls = _images.map((e) => e.path).toList();
+      c.imageUrl = _images.isNotEmpty ? _images.first.path : null;
       if (oldFolderId != null && oldFolderId != c.folderId) {
         await DBService.moveContentToFolder(c, oldFolderId);
       } else {
         await DBService.updateContent(c);
       }
     } else {
-      for (final image in _images) {
-        final content =
-            Content()
-              ..type = 'image'
-              ..folderId = _selectedFolder!.id
-              ..title = title
-              ..imageUrl = image.path
-              ..content = memo.isEmpty ? null : memo
-              ..tags = List.from(_tags)
-              ..createdAt = DateTime.now();
-        await DBService.saveContentToFolder(content);
-      }
+      final content = Content()
+        ..type = 'image'
+        ..folderId = _selectedFolder!.id
+        ..title = title
+        ..imageUrls = _images.map((e) => e.path).toList()
+        ..imageUrl = _images.isNotEmpty ? _images.first.path : null
+        ..content = memo.isEmpty ? null : memo
+        ..tags = List.from(_tags)
+        ..createdAt = DateTime.now();
+      await DBService.saveContentToFolder(content);
     }
 
     if (mounted) {
