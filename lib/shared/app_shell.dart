@@ -10,6 +10,8 @@ import '../screens/my_page/my_page_screen.dart';
 import '../screens/save/link/link_save_screen.dart';
 import '../screens/save/image/image_save_screen.dart';
 import '../screens/save/note/note_save_screen.dart';
+import '../screens/share/share_save_screen.dart';
+import '../services/share_intent_service.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -34,6 +36,38 @@ class _AppShellState extends State<AppShell> {
     const SearchScreen(),
     MyPageScreen(key: _myPageKey),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // iOS: 앱이 실행 중에 storoo://share로 열릴 때 바텀시트 표시
+    ShareIntentService.listenForShare(
+      onIosShare: _handleIosShare,
+    );
+  }
+
+  Future<void> _handleIosShare() async {
+    if (!mounted) return;
+    final type = await ShareIntentService.getShareType();
+    final text = await ShareIntentService.getInitialSharedText();
+    if (!mounted) return;
+    String? url, noteText;
+    if (type == 'link') {
+      url = ShareIntentService.extractUrl(text);
+    } else if (type == 'note') {
+      noteText = text;
+    }
+    ShareSaveScreen.show(
+      context,
+      type: type,
+      initialUrl: url,
+      initialNote: noteText,
+      onSaved: () {
+        _homeKey.currentState?.refresh();
+        _folderKey.currentState?.refresh();
+      },
+    );
+  }
 
   void _onTabTapped(int index) {
     if (index == 0) _homeKey.currentState?.refresh();

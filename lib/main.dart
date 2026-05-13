@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -25,6 +26,21 @@ class _NoScrollbarBehavior extends MaterialScrollBehavior {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DBService.init();
+
+  // iOS: URL 스킴(storoo://share)으로 실행된 경우 바텀시트만 표시
+  if (Platform.isIOS && await ShareIntentService.isShareLaunch()) {
+    final type = await ShareIntentService.getShareType();
+    final text = await ShareIntentService.getInitialSharedText();
+    String? url, noteText;
+    if (type == 'link') {
+      url = ShareIntentService.extractUrl(text);
+    } else if (type == 'note') {
+      noteText = text;
+    }
+    runApp(_ShareEntryApp(type: type, initialUrl: url, initialNote: noteText));
+    return;
+  }
+
   runApp(const MyApp());
 }
 

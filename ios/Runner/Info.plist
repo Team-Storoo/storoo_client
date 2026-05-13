@@ -47,5 +47,16 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>storoo</string>
+			</array>
+			<key>CFBundleURLName</key>
+			<string>com.example.storoo</string>
+		</dict>
+	</array>
 </dict>
 </plist>

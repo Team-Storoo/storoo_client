@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-/// Android ACTION_SEND 공유 인텐트 수신 서비스
-/// SRP: MethodChannel 통신만 담당
+/// 공유 인텐트 수신 서비스
+/// Android: ACTION_SEND 인텐트 (ShareActivity.kt)
+/// iOS: URL 스킴 storoo://share (AppDelegate.swift + ShareExtension)
 class ShareIntentService {
   static const _channel = MethodChannel('com.example.storoo/share');
 
@@ -33,12 +35,29 @@ class ShareIntentService {
     }
   }
 
+  /// iOS 전용: URL 스킴으로 실행됐는지 여부 (공유 콜드 스타트 감지)
+  static Future<bool> isShareLaunch() async {
+    if (!Platform.isIOS) return false;
+    try {
+      return await _channel.invokeMethod<bool>('isShareLaunch') ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// 앱 실행 중 새 공유 수신 시 콜백 등록
-  static void listenForSharedText(ValueChanged<String> onShared) {
+  /// [onAndroidText]: Android에서 새 텍스트 공유가 들어올 때
+  /// [onIosShare]: iOS에서 앱이 실행 중에 storoo://share로 열릴 때
+  static void listenForShare({
+    ValueChanged<String>? onAndroidText,
+    VoidCallback? onIosShare,
+  }) {
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'onNewSharedText') {
         final text = call.arguments as String?;
-        if (text != null && text.isNotEmpty) onShared(text);
+        if (text != null && text.isNotEmpty) onAndroidText?.call(text);
+      } else if (call.method == 'onShareReceived') {
+        onIosShare?.call();
       }
     });
   }
@@ -49,5 +68,11 @@ class ShareIntentService {
     if (text == null || text.isEmpty) return null;
     final match = RegExp(r'https?://\S+', caseSensitive: false).firstMatch(text);
     return match?.group(0);
+  }
+
+  // 기존 호환성 유지
+  @Deprecated('Use listenForShare instead')
+  static void listenForSharedText(ValueChanged<String> onShared) {
+    listenForShare(onAndroidText: onShared);
   }
 }
