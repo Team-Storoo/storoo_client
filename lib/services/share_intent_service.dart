@@ -26,12 +26,13 @@ class ShareIntentService {
     }
   }
 
-  /// 이미지 공유 시 캐시에 복사된 파일 경로 조회
-  static Future<String?> getImagePath() async {
+  /// 이미지 공유 시 캐시/App Group에 복사된 파일 경로 목록 조회 (최대 5개)
+  static Future<List<String>> getImagePaths() async {
     try {
-      return await _channel.invokeMethod<String>('getImagePath');
+      final result = await _channel.invokeMethod<List<dynamic>>('getImagePaths');
+      return result?.cast<String>() ?? [];
     } catch (_) {
-      return null;
+      return [];
     }
   }
 

@@ -32,12 +32,20 @@ void main() async {
     final type = await ShareIntentService.getShareType();
     final text = await ShareIntentService.getInitialSharedText();
     String? url, noteText;
+    List<String> imagePaths = [];
     if (type == 'link') {
       url = ShareIntentService.extractUrl(text);
     } else if (type == 'note') {
       noteText = text;
+    } else if (type == 'image') {
+      imagePaths = await ShareIntentService.getImagePaths();
     }
-    runApp(_ShareEntryApp(type: type, initialUrl: url, initialNote: noteText));
+    runApp(_ShareEntryApp(
+      type: type,
+      initialUrl: url,
+      initialNote: noteText,
+      imageFilePaths: imagePaths,
+    ));
     return;
   }
 
@@ -78,23 +86,23 @@ void shareMain() async {
     DBService.init(),
     ShareIntentService.getShareType(),
     ShareIntentService.getInitialSharedText(),
-    ShareIntentService.getImagePath(),
+    ShareIntentService.getImagePaths(),
   ]);
 
   final type = (results[1] as String?) ?? 'link';
   final sharedText = results[2] as String?;
-  final imagePath = results[3] as String?;
+  final imagePaths = results[3] as List<String>;
 
   String? url;
   String? noteText;
-  String? imageFilePath;
+  List<String> imageFilePaths = [];
 
   if (type == 'link') {
     url = ShareIntentService.extractUrl(sharedText);
   } else if (type == 'note') {
     noteText = sharedText;
   } else if (type == 'image') {
-    imageFilePath = imagePath;
+    imageFilePaths = imagePaths;
   }
 
   // 모든 데이터가 준비된 상태로 runApp → 첫 프레임에 즉시 바텀시트 표시
@@ -103,7 +111,7 @@ void shareMain() async {
       type: type,
       initialUrl: url,
       initialNote: noteText,
-      imageFilePath: imageFilePath,
+      imageFilePaths: imageFilePaths,
     ),
   );
 }
@@ -113,13 +121,13 @@ class _ShareEntryApp extends StatelessWidget {
     this.type = 'link',
     this.initialUrl,
     this.initialNote,
-    this.imageFilePath,
+    this.imageFilePaths = const [],
   });
 
   final String type;
   final String? initialUrl;
   final String? initialNote;
-  final String? imageFilePath;
+  final List<String> imageFilePaths;
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +140,7 @@ class _ShareEntryApp extends StatelessWidget {
         type: type,
         initialUrl: initialUrl,
         initialNote: initialNote,
-        imageFilePath: imageFilePath,
+        imageFilePaths: imageFilePaths,
       ),
     );
   }
@@ -143,13 +151,13 @@ class _ShareEntryPoint extends StatefulWidget {
     this.type = 'link',
     this.initialUrl,
     this.initialNote,
-    this.imageFilePath,
+    this.imageFilePaths = const [],
   });
 
   final String type;
   final String? initialUrl;
   final String? initialNote;
-  final String? imageFilePath;
+  final List<String> imageFilePaths;
 
   @override
   State<_ShareEntryPoint> createState() => _ShareEntryPointState();
@@ -170,7 +178,7 @@ class _ShareEntryPointState extends State<_ShareEntryPoint> {
       type: widget.type,
       initialUrl: widget.initialUrl,
       initialNote: widget.initialNote,
-      imageFilePath: widget.imageFilePath,
+      imageFilePaths: widget.imageFilePaths,
     );
     SystemNavigator.pop();
   }

@@ -6,6 +6,7 @@ import UIKit
 
     private var pendingShareType: String?
     private var pendingShareText: String?
+    private var pendingImagePaths: [String] = []
     private var shareChannel: FlutterMethodChannel?
 
     override func application(
@@ -47,13 +48,14 @@ import UIKit
             case "getShareType":
                 result(self.pendingShareType ?? "link")
             case "getSharedText":
-                // 읽은 후 클리어 (1회성 소비)
                 let text = self.pendingShareText
                 self.pendingShareType = nil
                 self.pendingShareText = nil
                 result(text)
-            case "getImagePath":
-                result(nil as String?)
+            case "getImagePaths":
+                let paths = self.pendingImagePaths
+                self.pendingImagePaths = []
+                result(paths)
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -66,8 +68,10 @@ import UIKit
         let defaults = UserDefaults(suiteName: "group.com.example.storoo")
         pendingShareType = defaults?.string(forKey: "shareType") ?? "link"
         pendingShareText = defaults?.string(forKey: "shareText")
+        pendingImagePaths = defaults?.stringArray(forKey: "shareImagePaths") ?? []
         defaults?.removeObject(forKey: "shareType")
         defaults?.removeObject(forKey: "shareText")
+        defaults?.removeObject(forKey: "shareImagePaths")
         defaults?.synchronize()
         return true
     }

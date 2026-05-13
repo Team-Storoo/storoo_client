@@ -9,12 +9,11 @@ import '../../save/widgets/memo_field.dart';
 import '../../save/widgets/tag_input_row.dart';
 
 /// Share 저장 시트 본문 레이아웃
-/// SRP: 폼 UI 렌더링만 담당
 class ShareSaveBody extends StatelessWidget {
   const ShareSaveBody({
     super.key,
     this.type = 'link',
-    this.imageFilePath,
+    this.imageFilePaths = const [],
     required this.folders,
     required this.selectedFolder,
     required this.onSelectFolder,
@@ -31,7 +30,7 @@ class ShareSaveBody extends StatelessWidget {
 
   /// "link" | "note" | "image"
   final String type;
-  final String? imageFilePath;
+  final List<String> imageFilePaths;
   final List<FolderItem> folders;
   final FolderItem? selectedFolder;
   final ValueChanged<FolderItem> onSelectFolder;
@@ -52,6 +51,12 @@ class ShareSaveBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── 이미지 미리보기 (이미지 타입) ──
+          if (type == 'image' && imageFilePaths.isNotEmpty) ...[
+            _ShareImagePreviewRow(paths: imageFilePaths),
+            const SizedBox(height: 20),
+          ],
+
           // ── 폴더 선택 ──
           if (loadingFolders)
             const Center(
@@ -93,34 +98,87 @@ class ShareSaveBody extends StatelessWidget {
   }
 }
 
-/// 공유된 이미지 미리보기 (이미지 타입 전용)
-class _ShareImagePreview extends StatelessWidget {
-  const _ShareImagePreview({this.filePath});
+/// 이미지 가로 스크롤 미리보기 (최대 5장)
+class _ShareImagePreviewRow extends StatelessWidget {
+  const _ShareImagePreviewRow({required this.paths});
 
-  final String? filePath;
+  final List<String> paths;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child:
-          filePath != null
-              ? Image.file(
-                File(filePath!),
-                width: double.infinity,
-                height: 180,
+    // 1장이면 전체 너비로 표시
+    if (paths.length == 1) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.file(
+          File(paths.first),
+          width: double.infinity,
+          height: 180,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _placeholder(),
+        ),
+      );
+    }
+
+    // 2장 이상이면 가로 스크롤
+    return SizedBox(
+      height: 160,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: paths.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (_, i) => Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.file(
+                File(paths[i]),
+                width: 140,
+                height: 160,
                 fit: BoxFit.cover,
-              )
-              : Container(
-                width: double.infinity,
-                height: 180,
-                color: const Color(0xFFF5F5F5),
-                child: const Icon(
-                  Icons.image_not_supported_outlined,
-                  size: 48,
-                  color: Color(0xFFBDBDBD),
+                errorBuilder: (_, __, ___) => _placeholder(width: 140),
+              ),
+            ),
+            // 장 수 뱃지 (마지막 썸네일 우상단)
+            if (i == 0)
+              Positioned(
+                top: 6,
+                right: 6,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '${paths.length}장',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _placeholder({double? width}) {
+    return Container(
+      width: width ?? double.infinity,
+      height: 160,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: const Icon(
+        Icons.image_not_supported_outlined,
+        size: 40,
+        color: Color(0xFFBDBDBD),
+      ),
     );
   }
 }
@@ -154,8 +212,7 @@ class _ShareTitleField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.primary),
-        ),
+          borderSide: const BorderSide(color: AppColors.primary)),
       ),
     );
   }

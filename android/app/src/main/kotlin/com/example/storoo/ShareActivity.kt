@@ -14,7 +14,7 @@ class ShareActivity : FlutterActivity() {
 
     private var shareType: String = "link"
     private var sharedText: String? = null
-    private var imageFilePath: String? = null
+    private var imageFilePaths: List<String> = emptyList()
 
     override fun getDartEntrypointFunctionName(): String = "shareMain"
 
@@ -26,25 +26,32 @@ class ShareActivity : FlutterActivity() {
                 when (call.method) {
                     "getShareType"   -> result.success(shareType)
                     "getSharedText"  -> result.success(sharedText)
-                    "getImagePath"   -> result.success(imageFilePath)
+                    "getImagePaths"  -> result.success(ArrayList(imageFilePaths))
                     else             -> result.notImplemented()
                 }
             }
     }
 
     private fun extractSharedData() {
-        if (intent?.action != Intent.ACTION_SEND) return
-
         when {
-            // ── 이미지 공유 ──────────────────────────────────────────
+            // ── 이미지 다중 공유 (ACTION_SEND_MULTIPLE) ──────────────
+            intent?.action == Intent.ACTION_SEND_MULTIPLE &&
+            intent?.type?.startsWith("image/") == true -> {
+                shareType = "image"
+                @Suppress("UNCHECKED_CAST")
+                val uris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+                    ?: arrayListOf()
+                imageFilePaths = uris.take(5).mapNotNull { copyUriToCache(it) }
+            }
+            // ── 이미지 단일 공유 (ACTION_SEND) ───────────────────────
+            intent?.action == Intent.ACTION_SEND &&
             intent?.type?.startsWith("image/") == true -> {
                 shareType = "image"
                 val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
-                if (uri != null) {
-                    imageFilePath = copyUriToCache(uri)
-                }
+                imageFilePaths = listOfNotNull(uri?.let { copyUriToCache(it) })
             }
             // ── 텍스트 공유: URL 포함 여부로 link / note 구분 ───────
+            intent?.action == Intent.ACTION_SEND &&
             intent?.type?.startsWith("text/") == true -> {
                 val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: ""
                 val hasUrl = Regex("https?://\\S+", RegexOption.IGNORE_CASE).containsMatchIn(text)

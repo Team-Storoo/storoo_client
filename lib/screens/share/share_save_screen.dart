@@ -16,7 +16,7 @@ class ShareSaveScreen extends StatefulWidget {
     this.type = 'link',
     this.initialUrl,
     this.initialNote,
-    this.imageFilePath,
+    this.imageFilePaths = const [],
     this.onSaved,
   });
 
@@ -24,7 +24,7 @@ class ShareSaveScreen extends StatefulWidget {
   final String type;
   final String? initialUrl;
   final String? initialNote;
-  final String? imageFilePath;
+  final List<String> imageFilePaths;
   final VoidCallback? onSaved;
 
   static Future<void> show(
@@ -32,7 +32,7 @@ class ShareSaveScreen extends StatefulWidget {
     String type = 'link',
     String? initialUrl,
     String? initialNote,
-    String? imageFilePath,
+    List<String> imageFilePaths = const [],
     VoidCallback? onSaved,
   }) {
     return showModalBottomSheet(
@@ -49,7 +49,7 @@ class ShareSaveScreen extends StatefulWidget {
           type: type,
           initialUrl: initialUrl,
           initialNote: initialNote,
-          imageFilePath: imageFilePath,
+          imageFilePaths: imageFilePaths,
           onSaved: onSaved,
         ),
       ),
@@ -153,15 +153,25 @@ class _ShareSaveScreenState extends State<ShareSaveScreen> {
     final memo = _memoCtrl.text.trim();
 
     if (widget.type == 'image') {
-      // ── 이미지 저장 ────────────────────────────────────────────
-      content = Content()
-        ..type = 'image'
-        ..folderId = _selectedFolder!.id
-        ..title = _titleCtrl.text.trim()
-        ..imageUrl = widget.imageFilePath
-        ..content = memo.isEmpty ? null : memo
-        ..tags = List.from(_tags)
-        ..createdAt = DateTime.now();
+      // ── 이미지 저장: 각 경로마다 Content 1개씩 생성 ──────────
+      final title = _titleCtrl.text.trim();
+      for (final path in widget.imageFilePaths) {
+        final img = Content()
+          ..type = 'image'
+          ..folderId = _selectedFolder!.id
+          ..title = title
+          ..imageUrl = path
+          ..content = memo.isEmpty ? null : memo
+          ..tags = List.from(_tags)
+          ..createdAt = DateTime.now();
+        await DBService.saveContentToFolder(img);
+      }
+      if (mounted) {
+        setState(() => _saving = false);
+        widget.onSaved?.call();
+        Navigator.of(context).pop();
+      }
+      return;
     } else if (widget.type == 'note') {
       // ── 노트 저장 (메모 없음) ───────────────────────────────────
       content = Content()
@@ -212,7 +222,7 @@ class _ShareSaveScreenState extends State<ShareSaveScreen> {
         Expanded(
           child: ShareSaveBody(
             type: widget.type,
-            imageFilePath: widget.imageFilePath,
+            imageFilePaths: widget.imageFilePaths,
             folders: _folders,
             selectedFolder: _selectedFolder,
             onSelectFolder: (f) => setState(() => _selectedFolder = f),
