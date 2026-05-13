@@ -159,8 +159,7 @@ class _ShareSaveScreenState extends State<ShareSaveScreen> {
         ..type = 'image'
         ..folderId = _selectedFolder!.id
         ..title = _titleCtrl.text.trim()
-        ..imageUrls = paths
-        ..imageUrl = paths.isNotEmpty ? paths.first : null
+        ..imageUrl = paths.join('\n')
         ..content = memo.isEmpty ? null : memo
         ..tags = List.from(_tags)
         ..createdAt = DateTime.now();

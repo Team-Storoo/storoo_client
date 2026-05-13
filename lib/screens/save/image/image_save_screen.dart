@@ -205,8 +205,7 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
       c.content = memo.isEmpty ? null : memo;
       c.tags = List.from(_tags);
       c.folderId = _selectedFolder!.id;
-      c.imageUrls = _images.map((e) => e.path).toList();
-      c.imageUrl = _images.isNotEmpty ? _images.first.path : null;
+      c.imageUrl = _images.map((e) => e.path).join('\n');
       if (oldFolderId != null && oldFolderId != c.folderId) {
         await DBService.moveContentToFolder(c, oldFolderId);
       } else {
@@ -217,8 +216,7 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
         ..type = 'image'
         ..folderId = _selectedFolder!.id
         ..title = title
-        ..imageUrls = _images.map((e) => e.path).toList()
-        ..imageUrl = _images.isNotEmpty ? _images.first.path : null
+        ..imageUrl = _images.map((e) => e.path).join('\n')
         ..content = memo.isEmpty ? null : memo
         ..tags = List.from(_tags)
         ..createdAt = DateTime.now();

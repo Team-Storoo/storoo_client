@@ -68,25 +68,36 @@ class SearchContentTile extends StatelessWidget {
   // ── 아이콘 / 썸네일 ────────────────────────────────────────
 
   Widget _buildThumbnail() {
+    // 이미지 타입은 effectiveImageUrls.first (다중 경로 인코딩 대응)
+    if (content.type == 'image') {
+      final paths = content.effectiveImageUrls;
+      if (paths.isNotEmpty) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.file(
+            File(paths.first),
+            width: 60,
+            height: 60,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => _iconBox(),
+          ),
+        );
+      }
+      return _iconBox();
+    }
+    // 링크 타입 OG 이미지
     final imageUrl = content.imageUrl;
     if (imageUrl != null && imageUrl.isNotEmpty) {
-      final img =
-          imageUrl.startsWith('http')
-              ? Image.network(
-                imageUrl,
-                width: 60,
-                height: 60,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _iconBox(),
-              )
-              : Image.file(
-                File(imageUrl),
-                width: 60,
-                height: 60,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _iconBox(),
-              );
-      return ClipRRect(borderRadius: BorderRadius.circular(10), child: img);
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.network(
+          imageUrl,
+          width: 60,
+          height: 60,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _iconBox(),
+        ),
+      );
     }
     return _iconBox();
   }

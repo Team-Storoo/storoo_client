@@ -78,8 +78,7 @@ class _SaveContentSheetState extends State<SaveContentSheet> {
       }
       content
         ..title = _imageTitleCtrl.text.trim().isEmpty ? '이미지' : _imageTitleCtrl.text.trim()
-        ..imageUrl = _pickedImage!.path
-        ..imageUrls = [_pickedImage!.path];
+        ..imageUrl = _pickedImage!.path;
     } else {
       final memoTitle = _memoTitleCtrl.text.trim();
       final memoContent = _memoContentCtrl.text.trim();
