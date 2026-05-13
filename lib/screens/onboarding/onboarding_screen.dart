@@ -7,7 +7,6 @@ import '../../services/db_service.dart';
 import '../../shared/app_shell.dart';
 import 'widgets/terms_step.dart';
 import 'widgets/nickname_step.dart';
-import 'widgets/personal_info_step.dart';
 import 'widgets/email_step.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -19,7 +18,6 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final TextEditingController nicknameController = TextEditingController();
-  final TextEditingController birthYearController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
 
   int step = 0;
@@ -29,8 +27,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   bool agreedPrivacy = false;
   bool agreedMarketing = false;
   bool agreedAds = false;
-
-  String? gender;
 
   bool get allAgreed =>
       agreedAge14 &&
@@ -46,25 +42,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       case 1:
         return _isValidNickname(nicknameController.text.trim());
       case 2:
-        return gender != null &&
-            _isValidBirthYear(birthYearController.text.trim());
-      case 3:
         return _isValidEmail(emailController.text.trim());
       default:
         return false;
     }
   }
 
-  /// 1900 ~ 현재 연도 사이의 4자리 숫자
-  bool _isValidBirthYear(String value) {
-    if (value.length != 4) return false;
-    final year = int.tryParse(value);
-    if (year == null) return false;
-    final currentYear = DateTime.now().year;
-    return year >= 1900 && year <= currentYear;
-  }
-
-  /// 한글, 영문 대소문자, 숫자, 밑줄(_), 마침표(.) 만 허용 / 2~15자
   bool _isValidNickname(String value) {
     if (value.length < 2) return false;
     final regex = RegExp(r'^[가-힣a-zA-Z0-9_.]+$');
@@ -92,8 +75,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final profile =
         UserProfile()
           ..nickname = nicknameController.text.trim()
-          ..gender = gender
-          ..birthYear = int.tryParse(birthYearController.text.trim())
           ..email = emailController.text.trim()
           ..agreedAge14 = agreedAge14
           ..agreedService = agreedService
@@ -116,7 +97,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void nextStep() {
     if (!canGoNext) return;
 
-    if (step < 3) {
+    if (step < 2) {
       setState(() => step++);
     } else {
       saveAndFinish();
@@ -124,7 +105,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void skipStep() {
-    if (step < 3) {
+    if (step < 2) {
       setState(() => step++);
     } else {
       saveAndFinish();
@@ -139,7 +120,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   void dispose() {
     nicknameController.dispose();
-    birthYearController.dispose();
     emailController.dispose();
     super.dispose();
   }
@@ -149,12 +129,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         nicknameController.text.trim().isEmpty
             ? 'OOO'
             : nicknameController.text.trim();
-    return [
-      '이용약관에 동의해 주세요.',
-      'Storoo에서 사용할\n닉네임을 설정해주세요.',
-      '안녕하세요, $nickname님!\n성별과 나이를 입력해주세요.',
-      '$nickname님의\n이메일 주소를 입력해주세요.',
-    ][step];
+    switch (step) {
+      case 0:
+        return '이용약관에 동의해 주세요.';
+      case 1:
+        return 'Storoo에서 사용할\n닉네임을 설정해주세요.';
+      case 2:
+        return '$nickname님의\n이메일 주소를 입력해주세요.';
+      default:
+        return '';
+    }
   }
 
   @override
@@ -247,13 +231,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           onChanged: () => setState(() {}),
         );
       case 2:
-        return PersonalInfoStep(
-          gender: gender,
-          onGenderChanged: (v) => setState(() => gender = v),
-          birthYearController: birthYearController,
-          onChanged: () => setState(() {}),
-        );
-      case 3:
         return EmailStep(
           controller: emailController,
           onChanged: () => setState(() {}),
@@ -294,7 +271,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
         ),
-        if (step == 2 || step == 3) ...[
+        if (step == 2) ...[
           const SizedBox(height: 12),
           GestureDetector(
             onTap: skipStep,

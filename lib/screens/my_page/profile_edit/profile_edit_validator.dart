@@ -10,15 +10,6 @@ class ProfileEditValidator {
     return RegExp(r'^[가-힣a-zA-Z0-9_.]+$').hasMatch(v);
   }
 
-  /// 출생년도: 비어있으면 통과, 값이 있으면 1900~현재 사이의 4자리 (선택)
-  static bool isBirthYearValidOrEmpty(String v) {
-    if (v.isEmpty) return true;
-    if (v.length < 4) return false;
-    final year = int.tryParse(v);
-    if (year == null) return false;
-    return year >= 1900 && year <= DateTime.now().year;
-  }
-
   /// 이메일: 비어있으면 통과, 값이 있으면 유효한 형식 (선택)
   static bool isEmailValidOrEmpty(String v) {
     if (v.isEmpty) return true;
