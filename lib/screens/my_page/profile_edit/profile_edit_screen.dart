@@ -66,7 +66,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   Future<void> _save() async {
     if (!_canSave) return;
 
-    // TODO [DB] 위 주석의 예시를 참고하여 여기에 저장 로직을 구현해 주세요.
+    final profile = await DBService.getUserProfile();
+    if (profile == null) return;
+
+    profile
+      ..nickname = _nicknameCtrl.text.trim()
+      ..email = _emailCtrl.text.trim()
+      ..updatedAt = DateTime.now();
+    await DBService.saveUserProfile(profile);
 
     if (!mounted) return;
     Navigator.of(context).pop();

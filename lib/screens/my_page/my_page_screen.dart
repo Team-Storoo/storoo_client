@@ -37,8 +37,9 @@ class MyPageScreenState extends State<MyPageScreen> {
     await _storageKey.currentState?.refresh();
   }
 
-  void _push(Widget screen) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+  Future<void> _push(Widget screen) async {
+    await Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+    if (mounted) _loadNickname();
   }
 
   Future<void> _loadNickname() async {
