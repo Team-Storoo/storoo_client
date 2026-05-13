@@ -84,11 +84,9 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
       _titleCtrl.text = c.title;
       _memoCtrl.text = c.content ?? '';
       _tags.addAll(c.tags);
-      // imageUrls 우선, 없으면 imageUrl fallback
-      if (c.imageUrls.isNotEmpty) {
-        _images.addAll(c.imageUrls.map(XFile.new));
-      } else if (c.imageUrl?.isNotEmpty == true) {
-        _images.add(XFile(c.imageUrl!));
+      final urls = c.effectiveImageUrls;
+      if (urls.isNotEmpty) {
+        _images.addAll(urls.map(XFile.new));
       }
     }
     _loadFolders();
