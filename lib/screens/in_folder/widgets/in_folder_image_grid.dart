@@ -38,29 +38,29 @@ class InFolderImageGrid extends StatelessWidget {
       );
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-        childAspectRatio: 1.0,
-      ),
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
       itemCount: items.length,
-      itemBuilder: (_, i) => _ImageCard(
-        item: items[i],
-        onDelete: onDelete,
-        onTap: onTap,
-        isEditMode: isEditMode,
-        isSelected: selectedIds.contains(items[i].id),
-        onToggleSelect: onToggleSelect,
-      ),
+      separatorBuilder:
+          (_, __) =>
+              const Divider(height: 1, thickness: 1, color: AppColors.divider),
+      itemBuilder:
+          (_, i) => _ImageCard(
+            item: items[i],
+            folderName: folderName,
+            onDelete: onDelete,
+            onTap: onTap,
+            isEditMode: isEditMode,
+            isSelected: selectedIds.contains(items[i].id),
+            onToggleSelect: onToggleSelect,
+          ),
     );
   }
 }
 
 class _ImageCard extends StatelessWidget {
   final Content item;
+  final String folderName;
   final Future<void> Function(int id) onDelete;
   final void Function(Content item)? onTap;
   final bool isEditMode;
@@ -69,6 +69,7 @@ class _ImageCard extends StatelessWidget {
 
   const _ImageCard({
     required this.item,
+    required this.folderName,
     required this.onDelete,
     this.onTap,
     this.isEditMode = false,
@@ -107,100 +108,185 @@ class _ImageCard extends StatelessWidget {
     );
   }
 
+  String _formatDate(DateTime dt) {
+    return '${dt.year}.${dt.month.toString().padLeft(2, '0')}.${dt.day.toString().padLeft(2, '0')}';
+  }
+
+  Widget _buildThumbnail() {
+    final images = item.effectiveImageUrls;
+    final count = images.length;
+
+    Widget thumb;
+    if (images.isNotEmpty) {
+      thumb = Image.file(
+        File(images.first),
+        width: 68,
+        height: 68,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _placeholder(),
+      );
+    } else {
+      return _placeholder();
+    }
+
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: thumb,
+        ),
+        if (count > 1)
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                '$count장',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _placeholder() {
+    return Container(
+      width: 68,
+      height: 68,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Icon(
+        Icons.image_outlined,
+        color: AppColors.textSecondary,
+        size: 28,
+      ),
+    );
+  }
+
+  Widget _buildSelectCircle() {
+    return Container(
+      width: 22,
+      height: 22,
+      margin: const EdgeInsets.only(top: 2),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isSelected ? AppColors.primary : Colors.transparent,
+        border: Border.all(
+          color: isSelected ? AppColors.primary : AppColors.textSecondary,
+          width: 2,
+        ),
+      ),
+      child: isSelected
+          ? const Icon(Icons.check, color: Colors.white, size: 14)
+          : null,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: isEditMode
           ? () => onToggleSelect?.call(item.id)
           : () => onTap?.call(item),
       onLongPress: isEditMode ? null : () => _showDeleteMenu(context),
-      child: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isSelected ? AppColors.primary : AppColors.divider,
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: () {
-                final thumb = item.effectiveImageUrls.isNotEmpty
-                    ? item.effectiveImageUrls.first
-                    : null;
-                return thumb != null
-                    ? Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.file(
-                            File(thumb),
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                            errorBuilder: (_, __, ___) => const Center(
-                              child: Icon(Icons.broken_image_outlined,
-                                  color: AppColors.textSecondary, size: 32),
-                            ),
-                          ),
-                          // 다중 이미지 뱃지
-                          if (item.effectiveImageUrls.length > 1)
-                            Positioned(
-                              top: 6,
-                              right: 6,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 5, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  '${item.effectiveImageUrls.length}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      )
-                    : const Center(
-                        child: Icon(Icons.image_outlined,
-                            color: AppColors.textSecondary, size: 32),
-                      );
-              }(),
-            ),
-          ),
-          if (isEditMode)
-            Positioned(
-              top: 8,
-              left: 8,
-              child: Container(
-                width: 22,
-                height: 22,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isSelected
-                      ? AppColors.primary
-                      : Colors.white.withValues(alpha: 0.85),
-                  border: Border.all(
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
-                    width: 2,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (isEditMode) ...[
+              _buildSelectCircle(),
+              const SizedBox(width: 12),
+            ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                child: isSelected
-                    ? const Icon(Icons.check, color: Colors.white, size: 14)
-                    : null,
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatDate(item.createdAt),
+                    style: const TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '폴더 > $folderName',
+                    style: const TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  if (item.tags.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: item.tags
+                          .take(5)
+                          .map((tag) => _TagChip(tag: tag))
+                          .toList(),
+                    ),
+                  ],
+                ],
               ),
             ),
-        ],
+            const SizedBox(width: 12),
+            _buildThumbnail(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TagChip extends StatelessWidget {
+  final String tag;
+
+  const _TagChip({required this.tag});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF2F2F2),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        tag,
+        style: const TextStyle(
+          fontFamily: 'Pretendard',
+          fontSize: 11,
+          color: AppColors.textSecondary,
+        ),
       ),
     );
   }
