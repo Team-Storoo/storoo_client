@@ -144,11 +144,10 @@ class _SaveImageScreenState extends State<SaveImageScreen> {
   void _addImage() async {
     if (_images.length >= _maxImages) return;
     try {
-      final XFile? file = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
-      );
-      if (file == null || !mounted) return;
-      setState(() => _images.add(file));
+      final remaining = _maxImages - _images.length;
+      final files = await ImagePicker().pickMultiImage(limit: remaining);
+      if (files.isEmpty || !mounted) return;
+      setState(() => _images.addAll(files));
     } catch (_) {}
   }
 
