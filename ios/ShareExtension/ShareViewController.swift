@@ -49,9 +49,21 @@ class ShareViewController: UIViewController {
         defaults?.set(type, forKey: "shareType")
         defaults?.set(text, forKey: "shareText")
         defaults?.synchronize()
-        // 메인 앱 열기 (Share Extension에서 NSExtensionContext.open 사용)
-        extensionContext?.open(mainAppUrl, completionHandler: nil)
+        openMainApp()
         finish()
+    }
+
+    // Share Extension에서 extensionContext?.open()은 iOS 13+에서 동작하지 않으므로
+    // Responder Chain을 통해 UIApplication을 찾아 openURL을 수행한다.
+    private func openMainApp() {
+        var responder: UIResponder? = self
+        while let r = responder {
+            if r.responds(to: NSSelectorFromString("openURL:")) {
+                r.perform(NSSelectorFromString("openURL:"), with: mainAppUrl)
+                return
+            }
+            responder = r.next
+        }
     }
 
     private func finish() {
